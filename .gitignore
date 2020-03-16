@@ -1,1 +1,4 @@
 DeepLearning.pdf
+*.exe
+builds
+.idea
