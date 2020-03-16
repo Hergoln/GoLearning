@@ -1,0 +1,1 @@
+Code with some observations and conclusions from GoTour tour over Go language together with examples from said tour.
