@@ -1,8 +1,9 @@
-package PSI
+package main
 
 import (
+	"./lab3"
 )
 
 func main() {
-	tests()
+	lab3.Zad1()
 }
