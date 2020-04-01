@@ -3,22 +3,11 @@ package main
 import (
 	"./netUtils"
 	"bufio"
-	"fmt"
 	"log"
 	"net"
 	"os"
 	"strings"
 )
-
-const (
-	connected = 1
-	disconnected = -1
-)
-
-type clientConnectState struct {
-	action int // connected or disconnected
-	addr net.Addr
-}
 
 func main() {
 
@@ -60,21 +49,19 @@ func main() {
 
 	log.Printf("Begin listening on port %s...", port)
 
-	connectionChan := make(chan clientConnectState)
-	counter := 0
-	go clientCounterHandler(counter, connectionChan)
-
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
 			log.Fatalln(err)
 		} else {
-			go clientHandler(conn, connectionChan)
+			clientHandlerIter(conn)
 		}
 	}
 }
 
-func clientHandler(conn net.Conn, clientCounter chan clientConnectState) {
+func clientHandlerIter(conn net.Conn) {
+	defer conn.Close()
+
 	var (
 		addr		= conn.RemoteAddr()
 		buff		= make([]byte, 512)
@@ -84,19 +71,14 @@ func clientHandler(conn net.Conn, clientCounter chan clientConnectState) {
 		readBytes	int
 	)
 
-	defer func () {
-		clientCounter <- clientConnectState{disconnected, addr}
-		conn.Close()
-	}()
-
-	clientCounter <- clientConnectState{connected, addr}
+	log.Printf("Client connected at port: %s\n", addr)
 
 	for err == nil || readBytes <= 0 {
 		readBytes, err = reader.Read(buff)
 		if err != nil {
 			break
 		}
-		fmt.Printf("Client %s, SAID: %s\n", addr, string(buff[:readBytes]))
+		log.Printf("Client %s, SAID: %s", addr, string(buff[:readBytes]))
 		_, err = writer.Write(buff[:readBytes])
 		if err != nil {
 			break
@@ -106,18 +88,6 @@ func clientHandler(conn net.Conn, clientCounter chan clientConnectState) {
 			break
 		}
 	}
-}
 
-func clientCounterHandler(counter int, countReceiver chan clientConnectState) {
-	var value clientConnectState
-	for {
-		value = <- countReceiver
-		counter += value.action
-		switch value.action {
-		case 1:
-			log.Printf("Client %s connected, total number of connected clients: %d", value.addr, counter)
-		case -1:
-			log.Printf("Client %s disconnected, total number of connected clients: %d", value.addr, counter)
-		}
-	}
+	log.Printf("Client at ported %s, disconnected", addr)
 }
