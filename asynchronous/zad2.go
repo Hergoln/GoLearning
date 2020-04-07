@@ -1,20 +1,14 @@
 package asynchronous
 
 import (
-	"bufio"
 	"fmt"
-	"log"
-	"os"
-	"strconv"
-	"strings"
+	"fyne.io/fyne/app"
+	"fyne.io/fyne/widget"
 	"time"
 )
 
-// TODO: zmienić konsolę na okienka bo przecież czytanie z konsoli kiedy się z niej wypisuje jest bez sensu xD
 func Zad2() {
 	workers := make([]chan int, MAXWORKERS)
-	var command string
-	consoleRead := bufio.NewScanner(os.Stdin)
 	for workerId := range workers {
 		workers[workerId] = make(chan int)
 	}
@@ -23,11 +17,83 @@ func Zad2() {
 		go writerZad2(10 - i - 1, workers[10 - i - 1])
 	}
 
-	for {
-		consoleRead.Scan()
-		command = consoleRead.Text()
-		handleCommand(command, workers)
-	}
+	// I am sorry for this monstrosity but something is wrong with function Append for Boxes in fyne.io lib
+	// and I could not use it as intended in a loop
+	buttonsResume := widget.NewVBox(widget.NewButton(fmt.Sprintf("Start %d", 0),  func() {
+		workers[0] <- RESUME
+	}),
+		widget.NewButton(fmt.Sprintf("Start %d", 1),  func() {
+			workers[1] <- RESUME
+		}),
+		widget.NewButton(fmt.Sprintf("Start %d", 2),  func() {
+			workers[2] <- RESUME
+		}),
+		widget.NewButton(fmt.Sprintf("Start %d", 3),  func() {
+			workers[3] <- RESUME
+		}),
+		widget.NewButton(fmt.Sprintf("Start %d", 4),  func() {
+			workers[4] <- RESUME
+		}),
+		widget.NewButton(fmt.Sprintf("Start %d", 5),  func() {
+			workers[5] <- RESUME
+		}),
+		widget.NewButton(fmt.Sprintf("Start %d", 6),  func() {
+			workers[6] <- RESUME
+		}),
+		widget.NewButton(fmt.Sprintf("Start %d", 7),  func() {
+			workers[7] <- RESUME
+		}),
+		widget.NewButton(fmt.Sprintf("Start %d", 8),  func() {
+			workers[8] <- RESUME
+		}),
+		widget.NewButton(fmt.Sprintf("Start %d", 9),  func() {
+			workers[9] <- RESUME
+		}))
+
+	buttonsPause := widget.NewVBox(widget.NewButton(fmt.Sprintf("Stop %d", 0),  func() {
+			workers[0] <- PAUSE
+		}),
+		widget.NewButton(fmt.Sprintf("Stop %d", 1),  func() {
+			workers[1] <- PAUSE
+		}),
+		widget.NewButton(fmt.Sprintf("Stop %d", 2),  func() {
+			workers[2] <- PAUSE
+		}),
+		widget.NewButton(fmt.Sprintf("Stop %d", 3),  func() {
+			workers[3] <- PAUSE
+		}),
+		widget.NewButton(fmt.Sprintf("Stop %d", 4),  func() {
+			workers[4] <- PAUSE
+		}),
+		widget.NewButton(fmt.Sprintf("Stop %d", 5),  func() {
+			workers[5] <- PAUSE
+		}),
+		widget.NewButton(fmt.Sprintf("Stop %d", 6),  func() {
+			workers[6] <- PAUSE
+		}),
+		widget.NewButton(fmt.Sprintf("Stop %d", 7),  func() {
+			workers[7] <- PAUSE
+		}),
+		widget.NewButton(fmt.Sprintf("Stop %d", 8),  func() {
+			workers[8] <- PAUSE
+		}),
+		widget.NewButton(fmt.Sprintf("Stop %d", 9),  func() {
+			workers[9] <- PAUSE
+		}))
+
+	a := app.New()
+	win := a.NewWindow("zad 2")
+	win.SetContent(
+		widget.NewVBox(
+			widget.NewHBox(
+				buttonsResume,
+				buttonsPause,
+			),
+			widget.NewButton("Quit", func() {
+				a.Quit()
+			}),
+		))
+	win.ShowAndRun()
 }
 
 func writerZad2(gInd int, lockerChan chan int) {
@@ -47,28 +113,5 @@ func writerZad2(gInd int, lockerChan chan int) {
 				time.Sleep(1 * time.Second)
 			}
 		}
-	}
-}
-
-func handleCommand(command string, workers []chan int) {
-	parts := strings.Split(command, " ")
-	if len(parts) < 2 {
-		log.Println("not enough information (missing action or thread number)")
-		return
-	}
-	action := parts[0]
-	gInd, err := strconv.Atoi(parts[1])
-
-	if err != nil || gInd > 9 || gInd < 0 {
-		log.Println("Incorrect goroutine indicator, action will not be performed")
-		return
-	}
-
-	if strings.EqualFold(action, "R") {
-		workers[gInd] <- RESUME
-	} else if strings.EqualFold(action, "P") {
-		workers[gInd] <- PAUSE
-	} else {
-		log.Printf("Unsupported command: %s\n", action)
 	}
 }

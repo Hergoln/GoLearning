@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"time"
 )
-// TODO: zmienić konsolę na okienka bo przecież czytanie z konsoli kiedy się z niej wypisuje jest bez sensu xD
 
 func Zad3() {
-	lock := make(chan int, MAXWORKERS)
+	lock := make(chan int, 1)
 	for i := 0; i < 9; i++ {
 		go writerZad3(10 - i - 1, lock)
 	}
@@ -16,15 +15,15 @@ func Zad3() {
 }
 
 func writerZad3(gInd int, lockerChan chan int) {
-	for r := 'A'; ; {
+	for r := 'A'; ; r++ {
 		if r > 'Z' {
 			r = 'A'
 		}
-		// simplest "lock" you can do in Go
+		// channel receive is blocking operation if used on empty channel
 		<- lockerChan
 		fmt.Printf("%s%d\n", string(r), gInd)
+		// writing to channel is also blocking operation if used on full channel
 		lockerChan <- 0
-		r++
 		time.Sleep(1 * time.Second)
 	}
 }

@@ -114,9 +114,9 @@ func clientCounterHandler(counter int, countReceiver chan clientConnectState) {
 		value = <- countReceiver
 		counter += value.action
 		switch value.action {
-		case 1:
+		case connected:
 			log.Printf("Client %s connected, total number of connected clients: %d", value.addr, counter)
-		case -1:
+		case disconnected:
 			log.Printf("Client %s disconnected, total number of connected clients: %d", value.addr, counter)
 		}
 	}

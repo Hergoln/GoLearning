@@ -2,19 +2,20 @@ package asynchronous
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
+
+
 func Zad1() {
-	errChan := make(chan error)
-	// create goroutine (golangs thread)
-	go func(err chan error) {
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
 		fmt.Println("Hello World!!")
 		time.Sleep(10 * time.Second)
-		// pass value to channel
-		err <- nil
-	}(errChan)
-
-	// waiting for value on channel
-	fmt.Print(<- errChan)
+		wg.Done()
+	}()
+	wg.Wait()
 }
