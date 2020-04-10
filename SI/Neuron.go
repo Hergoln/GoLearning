@@ -1,14 +1,5 @@
 package SI
 
-type INeuron interface {
-	Scale(input []float64) float64
-	Study(alpha float64, goal float64, inputs []float64) // for series data
-}
-
-type Neuron struct {
-	Weights []float64
-}
-
 // zad 1, 2
 /*
 	error = (prediction - goal)^2 = delta^2

@@ -1,11 +1,10 @@
-package lab2
+package lab3
 
 import (
 	"../SI"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -29,11 +28,13 @@ type TestFileLine struct {
 	expected int
 }
 
-func Zad4() {
-	network := SI.ConstructRandomNetwork(3, 4).Layers[0]
+func Zad3() {
+	network := SI.ConstructRandomNetwork(3, 4)
+	network.AppendRandomLayer(4)
+
 	resp, err := http.Get("http://pduch.iis.p.lodz.pl/PSI/training_colors.txt")
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		resp.Body.Close()
 		return
 	}
@@ -42,7 +43,7 @@ func Zad4() {
 
 	resp, err = http.Get("http://pduch.iis.p.lodz.pl/PSI/test_colors.txt")
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		resp.Body.Close()
 		return
 	}
@@ -51,20 +52,19 @@ func Zad4() {
 
 	for i := 0; ; i++ {
 		errorCounter := 0
-		// i created ConstructRandomNetwork but forgot to implement implementing just
-		// one layer creation, that is why this monster arose
 		alpha := 0.01
-		for line := range trainingLines {
-			var expectedOutput [4]float64
-			expectedOutput[trainingLines[line].expected - 1] = 1
-			network.Study(alpha, expectedOutput[:], trainingLines[line].input[:])
+		for i := range trainingLines {
+			var expected [4]float64
+			expected[trainingLines[i].expected - 1] = 1
+			network.StudyActiveFunc(alpha, expected[:], trainingLines[i].input[:], ReLu)
 		}
 
 		var prediction []float64
+
 		for line := range testingLines {
 			var expectedOutput [4]float64
 			expectedOutput[testingLines[line].expected - 1] = 1.
-			prediction = network.Predict(testingLines[line].input[:])
+			prediction = network.PredictActiveFunc(testingLines[line].input[:], ReLu)
 			indPre, _ := getColorAndIndex(prediction)
 			indExp, _ := getColorAndIndex(expectedOutput[:])
 			if indPre != indExp {
@@ -72,10 +72,16 @@ func Zad4() {
 			}
 		}
 		if errorCounter == 0 {
-			fmt.Printf("(NORM)Perfect score, %d iteration\n", i)
+			fmt.Printf("(DEEP)Perfect score, %d iteration\n", i)
 			return
 		}
 	}
+
+	/*
+		Q: Która sieć potrzebuje więcej czasu, żeby nauczyć się rozpoznawania kolorów?
+		A: Sieć głęboka potrzebuje więcej czasu, może to wynikać z faktu, że głęboka uczy się
+		wzorców a nie konkretnych przypadków ale nie musi.
+	 */
 }
 
 func parseTestingFiles(reader io.Reader) []TestFileLine  {

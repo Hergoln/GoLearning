@@ -40,7 +40,7 @@ func Zad1_2() {
 	alpha = 0.01
 	expectedOutputs := []float64{1., 1., 0, 1.}
 	err := 0.
-	for i := 0; i < 15000; i++ {
+	for i := 0; i < 3000; i++ {
 		err = 0
 		for i := range series {
 			err += neuron.Study(alpha, expectedOutputs[i], series[i])
@@ -51,6 +51,7 @@ func Zad1_2() {
 	fmt.Printf("Summrized error: %f", neuron.SumErrorForSeries(expectedOutputs, series))
 	/*
 		Q: Po ilu iteracjach błąd będzie mniejszy niż 5%?
-		A: Przy alpha = 0.01 przy 15 tysiącach juz jest na pewno mniej niż 5%
+		A: Przy alpha = 0.01 przy 15 (huhu, nie wiem jakim cudem 15k jak przy 3k już
+			jest ok xD) tysiącach juz jest na pewno mniej niż 5%
 	 */
 }
