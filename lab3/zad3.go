@@ -28,9 +28,16 @@ type TestFileLine struct {
 	expected int
 }
 
+/*
+	Q: Która sieć potrzebuje więcej czasu, żeby nauczyć się rozpoznawania kolorów?
+	A: Sieć głęboka potrzebuje więcej czasu, może to wynikać z faktu, że głęboka uczy się
+	wzorców a nie konkretnych przypadków ale nie musi.
+*/
+
 func Zad3() {
 	network := SI.ConstructRandomNetwork(3, 4)
-	network.AppendRandomLayer(4)
+	network.AppendRandomLayerWithActiveFunc(4, nil, nil)
+	fmt.Print(network)
 
 	resp, err := http.Get("http://pduch.iis.p.lodz.pl/PSI/training_colors.txt")
 	if err != nil {
@@ -72,16 +79,10 @@ func Zad3() {
 			}
 		}
 		if errorCounter == 0 {
-			fmt.Printf("(DEEP)Perfect score, %d iteration\n", i)
+			fmt.Printf("(DEEP)Perfect score, %d iterations\n", i)
 			return
 		}
 	}
-
-	/*
-		Q: Która sieć potrzebuje więcej czasu, żeby nauczyć się rozpoznawania kolorów?
-		A: Sieć głęboka potrzebuje więcej czasu, może to wynikać z faktu, że głęboka uczy się
-		wzorców a nie konkretnych przypadków ale nie musi.
-	 */
 }
 
 func parseTestingFiles(reader io.Reader) []TestFileLine  {

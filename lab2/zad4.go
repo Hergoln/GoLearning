@@ -72,7 +72,7 @@ func Zad4() {
 			}
 		}
 		if errorCounter == 0 {
-			fmt.Printf("(NORM)Perfect score, %d iteration\n", i)
+			fmt.Printf("(NORM)Perfect score, %d iterations\n", i)
 			return
 		}
 	}

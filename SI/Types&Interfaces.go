@@ -13,6 +13,8 @@ type ActiveFunc func(float64) float64
 
 type NeuralLayer struct {
 	Neurons []Neuron
+	ActiveFunc ActiveFunc
+	DerivFunc ActiveFunc
 }
 
 type INeuralNet interface {

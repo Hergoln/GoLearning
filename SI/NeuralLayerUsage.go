@@ -3,7 +3,7 @@ package SI
 func (layer NeuralLayer) Predict(input []float64) []float64 {
 	output := make([]float64, len(layer.Neurons))
 	for i, neuron := range layer.Neurons {
-		output[i] = neuron.Scale(input)
+		output[i] = layer.ActiveFunc(neuron.Scale(input))
 	}
 	return output
 }
