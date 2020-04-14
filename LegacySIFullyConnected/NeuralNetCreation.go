@@ -1,6 +1,8 @@
-package SI
+package LegacySIFullyConnected
 
-import "math/rand"
+import (
+	"math/rand"
+)
 
 func GibLayers(weights [][][]float64) DeepNeuralNet {
 	born := DeepNeuralNet{}
@@ -10,14 +12,13 @@ func GibLayers(weights [][][]float64) DeepNeuralNet {
 	return born
 }
 
-// zad 4
 func ConstructRandomNetwork(inputsCount, outputsCount int) DeepNeuralNet {
 	firstLayer := make([]Neuron, outputsCount)
 	for i := range firstLayer {
 		firstLayer[i] = Neuron{}
 		dendrites := make([]float64, inputsCount)
 		for j := range dendrites {
-			dendrites[j] = randStrategy1()
+			dendrites[j] = SomewhatOKRandStrategy()
 		}
 		firstLayer[i].Weights = dendrites
 	}
@@ -32,7 +33,7 @@ func (network *DeepNeuralNet) appendRandomLayer(outputNeuronsNumber int) {
 	for i := range neurons {
 		dendrites := make([]float64, connectionsNumber)
 		for j := range dendrites {
-			dendrites[j] = randStrategy1()
+			dendrites[j] = SomewhatOKRandStrategy()
 		}
 		neurons[i] = Neuron{dendrites}
 	}
@@ -41,11 +42,6 @@ func (network *DeepNeuralNet) appendRandomLayer(outputNeuronsNumber int) {
 }
 
 func (network *DeepNeuralNet) AppendRandomLayerWithActiveFunc(outputNeuronsNumber int, activeFunc ActiveFunc, derivFunc ActiveFunc) {
-	if activeFunc == nil || derivFunc == nil {
-		network.appendRandomLayer(outputNeuronsNumber)
-		return
-	}
-
 	neurons := make([]Neuron, outputNeuronsNumber)
 	newLayer := NeuralLayer{
 		Neurons: neurons,
@@ -57,7 +53,7 @@ func (network *DeepNeuralNet) AppendRandomLayerWithActiveFunc(outputNeuronsNumbe
 	for i := range neurons {
 		dendrites := make([]float64, connectionsNumber)
 		for j := range dendrites {
-			dendrites[j] = randStrategy1()
+			dendrites[j] = SomewhatOKRandStrategy()
 		}
 		neurons[i] = Neuron{dendrites}
 	}
@@ -65,6 +61,6 @@ func (network *DeepNeuralNet) AppendRandomLayerWithActiveFunc(outputNeuronsNumbe
 	network.Layers = append(network.Layers, newLayer)
 }
 
-func randStrategy1() float64 {
-	return rand.Float64() * 0.2 - 0.1
+func SomewhatOKRandStrategy() float64 {
+	return rand.Float64() * 2.0 - 0.5
 }

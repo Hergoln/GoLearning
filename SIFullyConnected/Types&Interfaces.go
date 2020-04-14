@@ -11,6 +11,10 @@ type Neuron struct {
 
 type ActiveFunc func(float64) float64
 
+type InOutPair struct {
+	
+}
+
 type NeuralLayer struct {
 	Neurons []Neuron
 	ActiveFunc ActiveFunc

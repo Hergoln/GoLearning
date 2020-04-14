@@ -1,7 +1,7 @@
 package lab2
 
 import (
-	"../SI"
+	"../LegacySIFullyConnected"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -30,7 +30,7 @@ type TestFileLine struct {
 }
 
 func Zad4() {
-	network := SI.ConstructRandomNetwork(3, 4).Layers[0]
+	network := LegacySIFullyConnected.ConstructRandomNetwork(3, 4).Layers[0]
 	resp, err := http.Get("http://pduch.iis.p.lodz.pl/PSI/training_colors.txt")
 	if err != nil {
 		log.Println(err)
@@ -48,12 +48,11 @@ func Zad4() {
 	}
 	defer resp.Body.Close()
 	testingLines := parseTestingFiles(resp.Body)
+	alpha := 0.01
 
 	for i := 0; ; i++ {
 		errorCounter := 0
-		// i created ConstructRandomNetwork but forgot to implement implementing just
-		// one layer creation, that is why this monster arose
-		alpha := 0.01
+
 		for line := range trainingLines {
 			var expectedOutput [4]float64
 			expectedOutput[trainingLines[line].expected - 1] = 1

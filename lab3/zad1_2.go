@@ -1,7 +1,7 @@
 package lab3
 
 import (
-	"../SI"
+	"../LegacySIFullyConnected"
 	"fmt"
 	"math"
 )
@@ -46,7 +46,7 @@ import (
  */
 
 func Zad1_2() {
-	network := SI.GibLayers(
+	network := LegacySIFullyConnected.GibLayers(
 		[][][]float64{
 			{
 				{0.1, 0.2, -0.1},
@@ -82,7 +82,7 @@ func Zad1_2() {
 
 	//network.StudyActiveFunc(alpha, expectedSeries[0], inputSeries[0], ReLu)
 	err := 0.0
-	for i := 0; i < 50; i++ {
+	for i := 0; i <= 50; i++ {
 		err = 0.0
 		for series := range expectedSeries {
 			temp := network.StudyActiveFunc(alpha, expectedSeries[series], inputSeries[series], ReLu)

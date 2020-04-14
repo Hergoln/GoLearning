@@ -1,7 +1,7 @@
 package lab3
 
 import (
-	"../SI"
+	"../LegacySIFullyConnected"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -16,6 +16,7 @@ const (
 	Blue	= 2
 	Yellow 	= 3
 )
+
 var ColorNames = map[int]string{
 	Red: "Red",
 	Green: "Green",
@@ -31,13 +32,15 @@ type TestFileLine struct {
 /*
 	Q: Która sieć potrzebuje więcej czasu, żeby nauczyć się rozpoznawania kolorów?
 	A: Sieć głęboka potrzebuje więcej czasu, może to wynikać z faktu, że głęboka uczy się
-	wzorców a nie konkretnych przypadków ale nie musi.
+	wzorców a nie konkretnych przypadków.
 */
 
 func Zad3() {
-	network := SI.ConstructRandomNetwork(3, 4)
+	LIMIT := 500
+	STEP := 10
+	network := LegacySIFullyConnected.ConstructRandomNetwork(3, 4)
 	network.AppendRandomLayerWithActiveFunc(4, nil, nil)
-	fmt.Print(network)
+	network.DisplayNet()
 
 	resp, err := http.Get("http://pduch.iis.p.lodz.pl/PSI/training_colors.txt")
 	if err != nil {
@@ -56,14 +59,17 @@ func Zad3() {
 	}
 	defer resp.Body.Close()
 	testingLines := parseTestingFiles(resp.Body)
+	alpha := .01
 
-	for i := 0; ; i++ {
-		errorCounter := 0
-		alpha := 0.01
-		for i := range trainingLines {
+	errorCounter := 0
+	errNet := 0.
+	for i := 0; i < LIMIT ; i++ {
+		errorCounter = 0
+		errNet = 0.
+		for line := range trainingLines {
 			var expected [4]float64
-			expected[trainingLines[i].expected - 1] = 1
-			network.StudyActiveFunc(alpha, expected[:], trainingLines[i].input[:], ReLu)
+			expected[trainingLines[line].expected - 1] = 1
+			errNet += network.StudyActiveFunc(alpha, expected[:], trainingLines[line].input[:], ReLu)
 		}
 
 		var prediction []float64
@@ -72,17 +78,34 @@ func Zad3() {
 			var expectedOutput [4]float64
 			expectedOutput[testingLines[line].expected - 1] = 1.
 			prediction = network.PredictActiveFunc(testingLines[line].input[:], ReLu)
+			//fmt.Println(prediction)
+			//fmt.Println(expectedOutput)
 			indPre, _ := getColorAndIndex(prediction)
 			indExp, _ := getColorAndIndex(expectedOutput[:])
 			if indPre != indExp {
+				//fmt.Println("Incorrect")
 				errorCounter++
+			} else {
+				//fmt.Println("Correct")
 			}
 		}
+
+		if i%STEP == 0 {
+			fmt.Printf("\n============================ %d ============================\n", i)
+			fmt.Printf("(DEEP)Score: %d/%d; Error: %f\n", errorCounter, len(testingLines), errNet)
+			network.DisplayNet()
+		}
+
+		//if errorCounter < int(float64(len(testingLines)) * 0.1) {
 		if errorCounter == 0 {
-			fmt.Printf("(DEEP)Perfect score, %d iterations\n", i)
+			fmt.Printf("\n(DEEP)Good score(%d/%d), %d iterations\n", errorCounter, len(testingLines), i)
 			return
 		}
 	}
+
+	fmt.Printf("\n============================ %d ============================\n", LIMIT)
+	fmt.Printf("(DEEP)Score: %d/%d; Error: %f\n", errorCounter, len(testingLines), errNet)
+	network.DisplayNet()
 }
 
 func parseTestingFiles(reader io.Reader) []TestFileLine  {

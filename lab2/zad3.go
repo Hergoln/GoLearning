@@ -1,12 +1,12 @@
 package lab2
 
 import (
-	"../SI"
+	"../LegacySIFullyConnected"
 	"fmt"
 )
 
 func Zad3() {
-	layer := SI.GibNeurons(
+	layer := LegacySIFullyConnected.GibNeurons(
 		[][]float64{
 			{0.1, 0.1, -0.3},
 			{0.1, 0.2, 0.0},

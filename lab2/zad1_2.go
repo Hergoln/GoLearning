@@ -1,7 +1,7 @@
 package lab2
 
 import (
-	"../SI"
+	"../LegacySIFullyConnected"
 	"fmt"
 )
 
@@ -10,7 +10,7 @@ func Zad1_2() {
 	input := .1
 	alpha := 1.
 	goal := .8
-	neuron := SI.Neuron{Weights: []float64{.5}}
+	neuron := LegacySIFullyConnected.Neuron{Weights: []float64{.5}}
 
 	for i := 0; i < 2000; i++ {
 		fmt.Printf("Error(iter: %d): %f\n", i, neuron.Study(alpha, goal, []float64{input}))
@@ -30,7 +30,7 @@ func Zad1_2() {
 	 */
 
 	// zad 2
-	neuron = SI.Neuron{Weights: []float64{0.1, 0.2, -0.1}}
+	neuron = LegacySIFullyConnected.Neuron{Weights: []float64{0.1, 0.2, -0.1}}
 	series := [][]float64{
 		{8.5, 0.65, 1.2},	// serie 1
 		{9.5, 0.8, 1.3},	// serie 2
