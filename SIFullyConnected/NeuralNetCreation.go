@@ -17,10 +17,9 @@ func GibLayers(weights [][][]float64) DeepNeuralNet {
 	activeFuncs -> activation functions for layers, shorter than layersIO by 2
 	derivFuncs -> activation functions derivatives for layers, shorter than layersIO by 2
 */
-func CreateNetwork(alpha float64, layersIO []int, activeFuncs []ActiveFunc, derivFuncs []ActiveFunc) *DeepNeuralNet {
+func CreateNetwork(layersIO []int, activeFuncs []ActiveFunc, derivFuncs []ActiveFunc) *DeepNeuralNet {
 	layersCount := len(layersIO) - 1
 	network := &DeepNeuralNet{
-		Alpha: alpha,
 		Layers: make([]NeuralLayer, layersCount),
 	}
 	for layerI := 0; layerI < layersCount; layerI++ {
@@ -52,7 +51,7 @@ func CreateNetwork(alpha float64, layersIO []int, activeFuncs []ActiveFunc, deri
 	return network
 }
 
-func constructRandomNetwork(inputsCount, outputsCount int, alpha float64) *DeepNeuralNet {
+func constructRandomNetwork(inputsCount, outputsCount int) *DeepNeuralNet {
 	firstLayer := make([]Neuron, outputsCount)
 	for i := range firstLayer {
 		firstLayer[i] = Neuron{}
@@ -62,7 +61,7 @@ func constructRandomNetwork(inputsCount, outputsCount int, alpha float64) *DeepN
 		}
 		firstLayer[i].Weights = dendrites
 	}
-	return &DeepNeuralNet{Alpha: alpha, Layers: []NeuralLayer{NeuralLayer{Neurons: firstLayer}}}
+	return &DeepNeuralNet{Layers: []NeuralLayer{NeuralLayer{Neurons: firstLayer}}}
 }
 
 func (network *DeepNeuralNet) AppendLayerWithActiveFunc(outputNeuronsNumber int, activeFunc ActiveFunc, derivFunc ActiveFunc) {

@@ -5,10 +5,6 @@ import (
 	"strings"
 )
 
-const (
-	ALPHA = 0.01
-)
-
 func (network DeepNeuralNet) Predict(input []float64) []float64 {
 	layersIO := input
 	for i := 0; i < len(network.Layers) - 1; i++ {
@@ -17,12 +13,7 @@ func (network DeepNeuralNet) Predict(input []float64) []float64 {
 	return network.Layers[len(network.Layers) - 1].scale(layersIO)
 }
 
-func (network *DeepNeuralNet) Fit(goals []float64, input []float64) float64 {
-	alpha := network.Alpha
-	if alpha == 0 {
-		alpha = ALPHA
-	}
-
+func (network *DeepNeuralNet) Fit(alpha float64, goals []float64, input []float64) float64 {
 	// outputs
 	outputs := network.outputs(input)
 
@@ -111,11 +102,14 @@ func (network *DeepNeuralNet) DisplayNet() {
 	}
 }
 
-func (network DeepNeuralNet) Dropout() {
+func (network DeepNeuralNet) dropout() {
 	panic("NotImplemented")
 }
 
-func (network DeepNeuralNet) PredictBatch(packages interface{}) {
+func PredictBatch(input [][]float64) {
+	panic("NotImplemented")
+}
+func FitBatch(goals [][]float64, inputs [][]float64) []float64 {
 	panic("NotImplemented")
 }
 

@@ -18,13 +18,12 @@ type NeuralLayer struct {
 }
 
 type INeuralNet interface {
-	Predict(input []float64) float64
-	Study(goals float64, inputs []float64)
-	Dropout()
-	PredictBatch(packages interface{})
+	Predict(input []float64) []float64
+	Fit(goals []float64, inputs []float64) float64
+	PredictBatch(input [][]float64) [][]float64
+	FitBatch(goals [][]float64, inputs [][]float64) []float64
 }
 
 type DeepNeuralNet struct {
 	Layers []NeuralLayer
-	Alpha float64
 }

@@ -15,7 +15,6 @@ func Zad4() {
 	// network creation
 	alpha := 0.01
 	network := SI.CreateNetwork(
-		alpha,
 		[]int{784, 40, 10},
 		[]SI.ActiveFunc{fun.ReLu, fun.ReLu},
 		[]SI.ActiveFunc{fun.ReLuDeriv, fun.ReLuDeriv},
@@ -31,6 +30,7 @@ func Zad4() {
 	for i, limit := 0, 100; i < limit; i++{
 		for set := range trainLabels.Labels {
 			netErr = network.Fit(
+				alpha,
 				getExpectedVector(trainLabels.Labels[set]),
 				getInputVector(trainImages.Images[set]),
 				)
