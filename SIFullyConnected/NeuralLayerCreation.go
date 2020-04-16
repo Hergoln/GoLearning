@@ -1,4 +1,4 @@
-package SI
+package SIFullyConnected
 
 func GibWeights(weights []float64) Neuron {
 	born := Neuron{}

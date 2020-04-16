@@ -1,4 +1,4 @@
-package SI
+package SIFullyConnected
 
 type INeuron interface {
 	Scale(input []float64) float64
@@ -10,10 +10,6 @@ type Neuron struct {
 }
 
 type ActiveFunc func(float64) float64
-
-type InOutPair struct {
-	
-}
 
 type NeuralLayer struct {
 	Neurons []Neuron
@@ -30,4 +26,5 @@ type INeuralNet interface {
 
 type DeepNeuralNet struct {
 	Layers []NeuralLayer
+	Alpha float64
 }
