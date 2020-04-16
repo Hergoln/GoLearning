@@ -9,7 +9,7 @@ type Neuron struct {
 	Weights []float64
 }
 
-type ActiveFunc func(float64) float64
+type ActiveFunc func([]float64) []float64
 
 type NeuralLayer struct {
 	Neurons []Neuron

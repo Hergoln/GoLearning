@@ -17,13 +17,13 @@ func GibLayers(weights [][][]float64) DeepNeuralNet {
 	activeFuncs -> activation functions for layers, shorter than layersIO by 2
 	derivFuncs -> activation functions derivatives for layers, shorter than layersIO by 2
 */
-func CreateNetwork(layersIO []int, activeFuncs []ActiveFunc, derivFuncs []ActiveFunc) *DeepNeuralNet {
+func CreateNetwork(layersIO []int, activeFuncs []ActiveFunc, derivFuncs []ActiveFunc, randStrategy func() float64) *DeepNeuralNet {
 	layersCount := len(layersIO) - 1
 	network := &DeepNeuralNet{
 		Layers: make([]NeuralLayer, layersCount),
 	}
 	for layerI := 0; layerI < layersCount; layerI++ {
-		// functions will be added later
+		// functions will be passed later
 		newbornLayer := NeuralLayer{
 			Neurons:    make([]Neuron, layersIO[layerI + 1]),
 			ActiveFunc: nil,
@@ -34,7 +34,7 @@ func CreateNetwork(layersIO []int, activeFuncs []ActiveFunc, derivFuncs []Active
 		for neuronI := range newbornLayer.Neurons {
 			dendrites := make([]float64, layersIO[layerI])
 			for connectionI := range dendrites {
-				dendrites[connectionI] = doctorsOkRandStrategy()
+				dendrites[connectionI] = randStrategy()
 			}
 			newbornLayer.Neurons[neuronI] = Neuron{dendrites}
 		}
@@ -46,8 +46,6 @@ func CreateNetwork(layersIO []int, activeFuncs []ActiveFunc, derivFuncs []Active
 		network.Layers[fun].ActiveFunc = activeFuncs[fun]
 		network.Layers[fun].DerivFunc = derivFuncs[fun]
 	}
-
-
 	return network
 }
 
@@ -90,4 +88,8 @@ func somewhatOKRandStrategy() float64 {
 
 func doctorsOkRandStrategy() float64 {
 	return rand.Float64() * 0.2 - 0.1
+}
+
+func tanhRandStrategy() float64 {
+	return rand.Float64() * 0.02 - 0.01
 }

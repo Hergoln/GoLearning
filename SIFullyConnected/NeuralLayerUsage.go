@@ -2,14 +2,12 @@ package SIFullyConnected
 
 func (layer NeuralLayer) predict(input []float64) []float64 {
 	output := make([]float64, len(layer.Neurons))
+	for i, neuron := range layer.Neurons {
+		output[i] = neuron.Scale(input)
+	}
+
 	if layer.ActiveFunc != nil {
-		for i, neuron := range layer.Neurons {
-			output[i] = layer.ActiveFunc(neuron.Scale(input))
-		}
-	} else {
-		for i, neuron := range layer.Neurons {
-			output[i] = neuron.Scale(input)
-		}
+		output = layer.ActiveFunc(output)
 	}
 	return output
 }

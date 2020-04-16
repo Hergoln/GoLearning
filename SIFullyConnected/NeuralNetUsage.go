@@ -22,8 +22,12 @@ func (network *DeepNeuralNet) Fit(alpha float64, goals []float64, input []float6
 	deltas[len(network.Layers) - 1] = network.outDelta(outputs[len(network.Layers)], goals)
 	for i := len(network.Layers) - 1; i > 0; i-- {
 		deltas[i-1] = hidDelta(network.Layers[i], deltas[i])
-		for each := range deltas[i - 1][0] {
-			deltas[i - 1][0][each] *= network.Layers[i].DerivFunc(outputs[i][each])
+
+		if network.Layers[i - 1].DerivFunc != nil {
+			deltasDeriv :=  network.Layers[i - 1].DerivFunc(outputs[i])
+			for each := range deltas[i - 1][0] {
+				deltas[i - 1][0][each] *= deltasDeriv[each]
+			}
 		}
 	}
 

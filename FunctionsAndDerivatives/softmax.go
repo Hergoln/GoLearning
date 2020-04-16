@@ -14,10 +14,10 @@ func Softmax(x []float64) []float64 {
 	return result
 }
 
-func softmaxDeriv(x, expected []float64) []float64 {
-	result := make([]float64, len(x))
+func softmaxDeriv(delta []float64) []float64 {
+	result := make([]float64, len(delta))
 	for i := range result {
-		result[i] = (x[i] - expected[i]) / float64(len(expected))
+		result[i] = (delta[i]) / float64(len(delta))
 	}
 	return result
 }

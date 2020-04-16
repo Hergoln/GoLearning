@@ -16,8 +16,9 @@ func Zad4() {
 	alpha := 0.01
 	network := SI.CreateNetwork(
 		[]int{784, 40, 10},
-		[]SI.ActiveFunc{fun.ReLu, fun.ReLu},
-		[]SI.ActiveFunc{fun.ReLuDeriv, fun.ReLuDeriv},
+		[]SI.ActiveFunc{fun.Sigmoid},
+		[]SI.ActiveFunc{fun.SigmoidDeriv},
+		func() float64 {return rand.Float64() * 0.2 - 0.1},
 		)
 
 	trainLabels := MNIST.ParseLabelFile("/train-labels.idx1-ubyte")
@@ -28,6 +29,7 @@ func Zad4() {
 
 	netErr := 0.0
 	for i, limit := 0, 100; i < limit; i++{
+		netErr = 0.0
 		for set := range trainLabels.Labels {
 			netErr = network.Fit(
 				alpha,
