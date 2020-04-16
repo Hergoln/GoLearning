@@ -33,8 +33,8 @@ func Zad4() {
 	network := SI.CreateNetwork(
 		alpha,
 		[]int{784, 40, 10},
-		[]SI.ActiveFunc{fun.ReLuFunc, fun.ReLuFunc},
-		[]SI.ActiveFunc{fun.ReLuFuncDeriv, fun.ReLuFuncDeriv},
+		[]SI.ActiveFunc{fun.ReLu, fun.ReLu},
+		[]SI.ActiveFunc{fun.ReLuDeriv, fun.ReLuDeriv},
 		)
 
 	trainLabels := parseLabelFile(dir + "/train-labels.idx1-ubyte")
