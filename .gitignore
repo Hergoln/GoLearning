@@ -2,3 +2,6 @@ DeepLearning.pdf
 *.exe
 builds
 .idea
+*/*.gz
+*/*.idx3-ubyte
+*/*.idx1-ubyte
