@@ -33,16 +33,16 @@ func Zad4() {
 		for set := range trainLabels.Labels {
 			netErr = network.Fit(
 				alpha,
-				getExpectedVector(trainLabels.Labels[set]),
-				getInputVector(trainImages.Images[set]),
+				MNIST.GetExpectedVector(trainLabels.Labels[set]),
+				MNIST.GetInputVector(trainImages.Images[set]),
 				)
 		}
 
 		var prediction []float64
 		errorCounter := 0
 		for set := range testLabels.Labels {
-			prediction = network.Predict(getInputVector(testImages.Images[set]))
-			if testLabels.Labels[set] != getOutputLabel(prediction) {
+			prediction = network.Predict(MNIST.GetInputVector(testImages.Images[set]))
+			if testLabels.Labels[set] != MNIST.GetOutputLabel(prediction) {
 				errorCounter++
 			}
 		}
@@ -58,29 +58,4 @@ func Zad4() {
 		}
 
 	}
-}
-
-func getExpectedVector(label byte) []float64 {
-	expected := make([]float64, 10)
-	expected[label] = 1.0
-	return expected
-}
-
-func getInputVector(image []byte) []float64 {
-	converted := make([]float64, len(image))
-	for i := range image {
-		converted[i] = float64(image[i]) / 255
-	}
-	return converted
-}
-
-func getOutputLabel(prediction []float64) byte {
-	var label byte
-	label = 0
-	for i := range prediction {
-		if prediction[label] < prediction[i] {
-			label = byte(i)
-		}
-	}
-	return label
 }

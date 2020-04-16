@@ -41,3 +41,20 @@ func ParseLabelFile(name string) ParsedLabels {
 	}
 	return labels
 }
+
+func GetExpectedVector(label byte) []float64 {
+	expected := make([]float64, 10)
+	expected[label] = 1.0
+	return expected
+}
+
+func GetOutputLabel(prediction []float64) byte {
+	var label byte
+	label = 0
+	for i := range prediction {
+		if prediction[label] < prediction[i] {
+			label = byte(i)
+		}
+	}
+	return label
+}

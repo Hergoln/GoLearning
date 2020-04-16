@@ -51,3 +51,11 @@ func ParseImageFile(name string) ParsedImages {
 
 	return images
 }
+
+func GetInputVector(image []byte) []float64 {
+	converted := make([]float64, len(image))
+	for i := range image {
+		converted[i] = float64(image[i]) / 255
+	}
+	return converted
+}
