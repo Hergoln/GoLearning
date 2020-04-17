@@ -6,18 +6,22 @@ func Softmax(x []float64) []float64 {
 	result := make([]float64, len(x))
 	sum := 0.0
 	for i := range x {
-		sum += x[i]
+		result[i] = math.Exp(x[i])
+		sum += result[i]
 	}
 	for i := range result {
-		result[i] = math.Exp(result[i]) / sum
+		result[i] = result[i] / sum
 	}
 	return result
 }
 
-func softmaxDeriv(delta []float64) []float64 {
+// this softmax derivative implementation is based on assumption that
+// what is passed into this function is in reality delta -> (x - expected)
+// rather than x itself
+func SoftmaxDeriv(delta []float64) []float64 {
 	result := make([]float64, len(delta))
 	for i := range result {
-		result[i] = (delta[i]) / float64(len(delta))
+		result[i] = (delta[i]) / float64(len(result))
 	}
 	return result
 }

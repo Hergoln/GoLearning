@@ -16,8 +16,8 @@ func Zad4() {
 	alpha := 0.01
 	network := SI.CreateNetwork(
 		[]int{784, 40, 10},
-		[]SI.ActiveFunc{fun.Sigmoid},
-		[]SI.ActiveFunc{fun.SigmoidDeriv},
+		[]SI.ActiveFunc{fun.Sigmoid, fun.Softmax},
+		[]SI.ActiveFunc{fun.SigmoidDeriv, fun.SoftmaxDeriv},
 		func() float64 {return rand.Float64() * 0.2 - 0.1},
 		)
 
@@ -47,7 +47,7 @@ func Zad4() {
 			}
 		}
 
-		if i%10 == 0 {
+		if i%5 == 0 {
 				fmt.Printf(
 				"%d iteration, network error: %f network score: %d/%d\n",
 				i,

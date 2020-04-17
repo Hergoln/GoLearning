@@ -1,16 +1,17 @@
 package GoMatrixUtils
 
 func OnesVector(size int) []float64 {
-	return make([]float64, size)
+	result := make([]float64, size)
+	for i := range result {
+		result[i] = 1
+	}
+	return result
 }
 
 func OnesMatrix(width, height int) [][]float64 {
 	mat := make([][]float64, height)
 	for i := range mat {
-		mat[i] = make([]float64, width)
-		for j := range mat[i] {
-			mat[i][j] = 1
-		}
+		mat[i] = OnesVector(width)
 	}
 	return mat
 }
