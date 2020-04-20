@@ -59,3 +59,11 @@ func GetInputVector(image []byte) []float64 {
 	}
 	return converted
 }
+
+func GetInputMatrix(images [][]byte) [][]float64 {
+	converted := make([][]float64, len(images))
+	for each := range converted {
+		converted[each] = GetInputVector(images[each])
+	}
+	return converted
+}

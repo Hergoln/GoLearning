@@ -18,10 +18,10 @@ func Softmax(x []float64) []float64 {
 // this softmax derivative implementation is based on assumption that
 // what is passed into this function is in reality delta -> (x - expected)
 // rather than x itself
-func SoftmaxDeriv(delta []float64) []float64 {
-	result := make([]float64, len(delta))
+func SoftmaxDeriv(pred []float64) []float64 {
+	result := make([]float64, len(pred))
 	for i := range result {
-		result[i] = (delta[i]) / float64(len(result))
+		result[i] = (pred[i]) / float64(len(result))
 	}
 	return result
 }

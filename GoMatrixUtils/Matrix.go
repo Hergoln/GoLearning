@@ -39,3 +39,25 @@ func ScaleMatrix(matrix [][]float64, scalingFact func(float64) float64) [][]floa
 	}
 	return matrix
 }
+
+func ScaleVecVec(this, that []float64) {
+	for i := range this {
+		this[i] *= that[i]
+	}
+}
+
+func ScaleMatrixMatrix(this, that [][]float64) {
+	for row := range this {
+		for col := range this[0] {
+			this[row][col] *= that[row][col]
+		}
+	}
+}
+
+func Transpose(from [][]float64) [][]float64 {
+	to := make([][]float64, len(from[0]))
+	for each := range to {
+		to[each] = make([]float64, len(from))
+	}
+	return to
+}

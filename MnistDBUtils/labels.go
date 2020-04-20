@@ -48,6 +48,14 @@ func GetExpectedVector(label byte) []float64 {
 	return expected
 }
 
+func GetExpectedMatrix(labels []byte) [][]float64 {
+	expected := make([][]float64, len(labels))
+	for each := range expected {
+		expected[each] = GetExpectedVector(labels[each])
+	}
+	return expected
+}
+
 func GetOutputLabel(prediction []float64) byte {
 	var label byte
 	label = 0
@@ -57,4 +65,12 @@ func GetOutputLabel(prediction []float64) byte {
 		}
 	}
 	return label
+}
+
+func GetOutputLabelsVector(predictions [][]float64) []byte {
+	labels := make([]byte, len(predictions))
+	for each := range labels {
+		labels[each] = GetOutputLabel(predictions[each])
+	}
+	return labels
 }
