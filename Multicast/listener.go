@@ -5,7 +5,6 @@ import (
 	"golang.org/x/net/ipv4"
 	"log"
 	"net"
-	"time"
 )
 
 const (
@@ -19,23 +18,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// listening
-	en0, err := net.InterfaceByName("en0") // da hell is that?
-
-
-
 	conn, err := net.ListenPacket("udp4", group.String())
 	checkErr(err)
 	defer conn.Close()
 
 	packetConn := ipv4.NewPacketConn(conn)
-	packetConn.SetMulticastLoopback(false)
-	if err := packetConn.JoinGroup(en0, group); err != nil {
+	fmt.Println(packetConn.LocalAddr().String() + " Listen and obey")
+	if err := packetConn.JoinGroup(nil, group); err != nil {
 		checkErr(err)
 	}
-	defer packetConn.LeaveGroup(en0, group)
-
-	go ping(group)
+	defer packetConn.LeaveGroup(nil, group)
 
 	buff := make([]byte, BUFFSIZE)
 	for {
@@ -51,16 +43,5 @@ func main() {
 func checkErr(err error) {
 	if err != nil {
 		panic(err)
-	}
-}
-
-func ping(addr *net.UDPAddr) {
-	conn, err := net.DialUDP("udp", nil, addr)
-	checkErr(err)
-	for {
-		message := "Ping Pong"
-		_, err = conn.Write([]byte(message))
-		checkErr(err)
-		time.Sleep(1 * time.Second)
 	}
 }

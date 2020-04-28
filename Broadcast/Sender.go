@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -15,26 +16,28 @@ const (
 
 func main() {
 	addr := getIPs()[1]
-	//fmt.Println(addr)
-	//sendBroadMessage(addr)
-
 	addrA := &net.IPNet{IP: addr, Mask: addr.DefaultMask()}
 	broadAddr, _ := lastAddr(addrA)
-	fmt.Println(broadAddr)
 	sendBroadMessage(broadAddr)
 }
 
 func sendBroadMessage(addr net.IP) {
+	var response string
 	udpA, err := net.ResolveUDPAddr("udp", addr.String() + ":2137")
 	checkErr(err)
 
-	fmt.Print(udpA)
+	fmt.Println(udpA)
 	conn, err := net.DialUDP("udp", nil, udpA)
 	checkErr(err)
-
-	_, err = conn.Write([]byte("anything"))
 	defer conn.Close()
-	checkErr(err)
+	consoleRead := bufio.NewScanner(os.Stdin)
+	for {
+		consoleRead.Scan()
+		response = consoleRead.Text()
+		_, err = conn.Write([]byte(response))
+		checkErr(err)
+	}
+
 }
 
 func getIPs() []net.IP {
@@ -61,6 +64,6 @@ func lastAddr(n *net.IPNet) (net.IP, error) {
 
 func checkErr(err error) {
 	if err != nil {
-		fmt.Print(err)
+		panic(err)
 	}
 }

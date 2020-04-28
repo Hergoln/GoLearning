@@ -1,40 +1,79 @@
 package main
 
 import (
+	"context"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"net"
 	"os"
+	"syscall"
+)
+
+const (
+	BROADLAN = "192.168.0.255"
+	BROADLOOPBACK = "169.254.255.255"
 )
 
 func main() {
 	addr := getIPs()[1]
-	fmt.Println(addr)
 	listenBroad(addr)
-
-	//addrA := &net.IPNet{IP: addr, Mask: addr.DefaultMask()}
-	//broadAddr, _ := lastAddr(addrA)
-	//fmt.Println(broadAddr)
-	//listenBroad(broadAddr)
 }
 
 func listenBroad(addr net.IP) {
-	udpA, err := net.ResolveUDPAddr("udp", ":2137")
+	udpA, err := net.ResolveUDPAddr("udp", addr.String() + ":2137")
 	checkErr(err)
-	fmt.Println(udpA)
+	fmt.Println("Listen and obey " + udpA.String())
 
-	conn, err := net.ListenUDP("udp", udpA)
+	config := &net.ListenConfig{Control: reusePort}
+
+	conn, err := config.ListenPacket(context.Background(), "udp", udpA.String())
 	checkErr(err)
-
 	buff := make([]byte, 512)
-
 	for {
-		_, err := conn.Read(buff)
+		count, addr, err := conn.ReadFrom(buff)
 		checkErr(err)
-
-		fmt.Print(string(buff))
+		fmt.Println(addr.String() + ": " + string(buff[:count]))
 	}
+
+	//buff := make([]byte, 512)
+	//sock, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, syscall.IPPROTO_UDP)
+	//checkErr(err)
+	//err = syscall.SetsockoptInt(sock, syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
+	//checkErr(err)
+	//udpA, err := net.ResolveUDPAddr("udp", ":2137")
+	//checkErr(err)
+	//err = syscall.Bind(sock, &syscall.SockaddrInet4{Port: udpA.Port})
+	//checkErr(err)
+	//file := os.NewFile(uintptr(sock), string(sock))
+	//conn, err := net.FilePacketConn(file)
+	//checkErr(err)
+	//fmt.Println("Listen and obey " + conn.LocalAddr().String())
+	//err = file.Close()
+	//checkErr(err)
+	//for {
+	//	n, remoteAddr, _ := conn.ReadFrom(buff)
+	//	fmt.Printf("%s said : %s\n", remoteAddr.String(), n)
+	//}
+
+	//sock, err := windows.Socket(windows.AF_INET, windows.SOCK_DGRAM, windows.IPPROTO_UDP)
+	//checkErr(err)
+	//err = windows.SetsockoptInt(sock, windows.SOL_SOCKET, windows.SO_REUSEADDR, 1)
+	//checkErr(err)
+	//udpA, err := net.ResolveUDPAddr("udp", addr.String() + ":2137")
+	//checkErr(err)
+	//err = windows.Bind(sock, &windows.SockaddrInet4{Port: udpA.Port})
+	//checkErr(err)
+	//file := os.NewFile(uintptr(sock), string(sock))
+	//conn, err := net.FilePacketConn(file)
+	//checkErr(err)
+	//fmt.Println("Listen and obey " + conn.LocalAddr().String())
+	//err = file.Close()
+	//checkErr(err)
+	//for {
+	//	n, remoteAddr, _ := conn.ReadFrom(buff)
+	//	fmt.Printf("%s said : %s\n", remoteAddr.String(), n)
+	//}
 }
 
 func getIPs() []net.IP {
@@ -61,6 +100,12 @@ func lastAddr(n *net.IPNet) (net.IP, error) {
 
 func checkErr(err error) {
 	if err != nil {
-		fmt.Print(err)
+		panic(err)
 	}
+}
+
+func reusePort(network, address string, conn syscall.RawConn) error {
+	return conn.Control(func(descriptor uintptr) {
+		syscall.SetsockoptInt(syscall.Handle(descriptor), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
+	})
 }
