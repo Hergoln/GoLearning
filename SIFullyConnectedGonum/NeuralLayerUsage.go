@@ -8,16 +8,19 @@ func (layer *NeuralLayer) predict(input *mat.Dense) *mat.Dense {
 
 	x, _ := output.Dims()
 	for i := 0; i < x; i++ {
-		temp1 := mat.VecDenseCopyOf(output.RowView(i)).RawVector().Data
-		temp := layer.ActiveFunc(temp1)
+		temp := mat.VecDenseCopyOf(output.RowView(i)).RawVector().Data
+		if layer.ActiveFunc != nil {
+			temp = layer.ActiveFunc(temp)
+		}
 		output.SetRow(i, temp)
 	}
 
 	return output
 }
 
-func (layer *NeuralLayer) fit(alpha float64, input *mat.Dense,  deltas *mat.Dense) {
-	deltas.Mul(deltas, input) // Transpose (T()) might be necessary
-	deltas.Scale(alpha, deltas)
-	layer.Neurons.Sub(layer.Neurons, deltas)
+func (layer *NeuralLayer) fit(alpha float64, input *mat.Dense, deltas *mat.Dense) {
+	tempu := &mat.Dense{}
+	tempu.Mul(deltas.T(), input)
+	tempu.Scale(alpha, tempu)
+	layer.Neurons.Sub(layer.Neurons, tempu)
 }

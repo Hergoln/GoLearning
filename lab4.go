@@ -3,7 +3,7 @@ package main
 import (
 	fun "./FunctionsAndDerivatives"
 	MNIST "./MnistDBUtils"
-	SI "./SIFullyConnected"
+	SI "./SIFullyConnectedGonum"
 	"fmt"
 	"math/rand"
 	"time"
@@ -17,7 +17,7 @@ func main() {
 	testLabels := MNIST.ParseLabelFile("t10k-labels.idx1-ubyte")
 	testImages := MNIST.ParseImageFile("t10k-images.idx3-ubyte")
 
-	alpha := 0.001
+	alpha := 0.0005
 	batchSize := 100
 	inputSize := int(trainImages.Width * trainImages.Height)
 	hiddenLayer := 100
@@ -28,15 +28,16 @@ func main() {
 		[]int{inputSize, hiddenLayer, outputSize},
 		[]SI.ActiveFunc{fun.Tanh, fun.Softmax},
 		[]SI.ActiveFunc{fun.TanhDeriv, fun.SoftmaxDeriv},
-		func() float64 {return rand.Float64() * 0.2 - 0.1},
+		func() float64 { return rand.Float64()*0.02 - 0.01 },
+		func() float64 { return float64(rand.Uint64() % 2) },
 	)
 
 	netErr := 0.0
-	for i, limit := 0, 100; i < limit; i++{
+	for i, limit := 0, 100; i < limit; i++ {
 		netErr = 0.0
 		for i := 0; i < len(trainLabels.Labels); i += batchSize {
-			batchGoals := trainLabels.Labels[i: i + batchSize]
-			batchInputs := trainImages.Images[i: i + batchSize]
+			batchGoals := trainLabels.Labels[i : i+batchSize]
+			batchInputs := trainImages.Images[i : i+batchSize]
 
 			netErr = network.FitBatch(
 				alpha,
@@ -59,7 +60,7 @@ func main() {
 				"%d iteration, network error: %f network score: %d/%d\n",
 				i,
 				netErr,
-				int(testLabels.DataCount) - errorCounter,
+				int(testLabels.DataCount)-errorCounter,
 				testLabels.DataCount,
 			)
 		}

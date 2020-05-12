@@ -19,4 +19,5 @@ type INeuralNet interface {
 
 type DeepNeuralNet struct {
 	Layers []NeuralLayer
+	DropoutStrategy func() float64
 }

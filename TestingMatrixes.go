@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-	// don't know how to get this value, thus its hard coded for now
 	rand.Seed(time.Now().UnixNano())
 	// network creation
 	alpha := 0.01
@@ -18,7 +17,8 @@ func main() {
 		[]int{784, 40, 10},
 		[]SI.ActiveFunc{fun.Sigmoid, fun.Softmax},
 		[]SI.ActiveFunc{fun.SigmoidDeriv, fun.SoftmaxDeriv},
-		func() float64 {return rand.Float64() * 0.2 - 0.1},
+		func() float64 { return rand.NormFloat64()*0.2 - 0.1 },
+		func() float64 { return float64(rand.Uint64() % 2) },
 	)
 
 	trainLabels := MNIST.ParseLabelFile("/train-labels.idx1-ubyte")
@@ -28,7 +28,7 @@ func main() {
 	testImages := MNIST.ParseImageFile("/t10k-images.idx3-ubyte")
 
 	netErr := 0.0
-	for i, limit := 0, 100; i < limit; i++{
+	for i, limit := 0, 100; i < limit; i++ {
 		netErr = 0.0
 		for set := range trainLabels.Labels {
 			netErr = network.Fit(
@@ -52,7 +52,7 @@ func main() {
 				"%d iteration, network error: %f network score: %d/%d\n",
 				i,
 				netErr,
-				int(testLabels.DataCount) - errorCounter,
+				int(testLabels.DataCount)-errorCounter,
 				testLabels.DataCount,
 			)
 		}
