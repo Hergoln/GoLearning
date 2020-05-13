@@ -2,10 +2,10 @@ package main
 
 import (
 	//"./lab3"
-	"./lab4"
+	//"./lab4"
+	"./ConvolutionalTests"
 )
 
 func main() {
-	//lab3.Zad4()
-	lab4.Zad1()
+	ConvolutionalTests.Zad1()
 }

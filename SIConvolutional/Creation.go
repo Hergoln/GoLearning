@@ -1,1 +1,5 @@
 package SIConvolutional
+
+func CreateNet() {
+
+}
