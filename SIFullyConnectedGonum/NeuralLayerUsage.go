@@ -2,17 +2,17 @@ package SIFullyConnectedGonum
 
 import "gonum.org/v1/gonum/mat"
 
-func (layer *NeuralLayer) predict(input *mat.Dense) *mat.Dense {
+func (layer *NeuralLayer) Predict(input *mat.Dense) *mat.Dense {
 	output := &mat.Dense{}
 	output.Mul(input, layer.Neurons.T())
 
-	x, _ := output.Dims()
-	for i := 0; i < x; i++ {
-		temp := mat.VecDenseCopyOf(output.RowView(i)).RawVector().Data
-		if layer.ActiveFunc != nil {
+	if layer.ActiveFunc != nil {
+		x, _ := output.Dims()
+		for i := 0; i < x; i++ {
+			temp := mat.VecDenseCopyOf(output.RowView(i)).RawVector().Data
 			temp = layer.ActiveFunc(temp)
+			output.SetRow(i, temp)
 		}
-		output.SetRow(i, temp)
 	}
 
 	return output

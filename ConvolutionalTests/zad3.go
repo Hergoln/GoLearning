@@ -9,14 +9,15 @@ import (
 	"math/rand"
 )
 
-func Zad2() {
+func Zad3() {
 	// don't know how to get this value, thus its hard coded for now
 	// network creation
 	alpha := 0.01
-	inputSize := 676 * 16
+	outputSize := 10
+	maskSize := 2
 	inputRows := 28
 	inputCols := 28
-	outputSize := 10
+	fxInputSize := ((inputRows - maskSize) / maskSize + 1) * ((inputRows - maskSize) / maskSize + 1)
 
 	trainLabels := MNIST.ParseLabelFile("/train-labels.idx1-ubyte")
 	trainImages := MNIST.ParseImageFile("/train-images.idx3-ubyte")
@@ -25,7 +26,7 @@ func Zad2() {
 	testImages := MNIST.ParseImageFile("/t10k-images.idx3-ubyte")
 
 	fc := FC.CreateNetwork(
-		[]int{inputSize, outputSize},
+		[]int{fxInputSize, outputSize},
 		[]FC.ActiveFunc{nil},
 		[]FC.ActiveFunc{nil},
 		func() float64 { return rand.Float64()*0.02 - 0.009 },
@@ -38,7 +39,7 @@ func Zad2() {
 	for i, limit := 0, 100; i < limit; i++ {
 		netErr = 0.0
 		for set := range trainLabels.Labels {
-			netErr = CONV.ConvAndFcFit(
+			netErr = CONV.ConvReluPoolFcFit(
 				alpha,
 				&fc.Layers[0],
 				conv,
@@ -48,18 +49,20 @@ func Zad2() {
 				MNIST.GetExpectedVector(trainLabels.Labels[set]),
 				fun.ReLu,
 				fun.ReLuDeriv,
+				maskSize,
 			)
 		}
 
 		var prediction []float64
 		errorCounter := 0
 		for set := range testLabels.Labels {
-			prediction = CONV.ConvAndFcPredict(
+			prediction = CONV.ConvReluPoolFcPredict(
 				&fc.Layers[0],
 				conv,
 				MNIST.GetInputVector(testImages.Images[set]),
 				inputRows,
 				inputCols,
+				maskSize,
 			)
 			if testLabels.Labels[set] != MNIST.GetOutputLabel(prediction) {
 				errorCounter++

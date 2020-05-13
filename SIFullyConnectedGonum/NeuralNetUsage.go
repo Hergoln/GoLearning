@@ -9,7 +9,7 @@ import (
 func (network DeepNeuralNet) Predict(input []float64) []float64 {
 	denseInput := mat.NewDense(1, len(input), input)
 	for i := range network.Layers {
-		denseInput = network.Layers[i].predict(denseInput)
+		denseInput = network.Layers[i].Predict(denseInput)
 	}
 	return denseInput.RawRowView(0)
 }
@@ -19,7 +19,7 @@ func (network DeepNeuralNet) outputs(input []float64) []*mat.Dense {
 	outputs := make([]*mat.Dense, layersCount+1)
 	outputs[0] = mat.NewDense(1, len(input), input)
 	for i := 0; i < layersCount; i++ {
-		outputs[i+1] = network.Layers[i].predict(outputs[i])
+		outputs[i+1] = network.Layers[i].Predict(outputs[i])
 	}
 	return outputs
 }
@@ -145,7 +145,7 @@ func (network DeepNeuralNet) outputsBatch(inputs [][]float64) []*mat.Dense {
 
 	outputs[0] = mat.NewDense(len(inputs), len(inputs[0]), vector)
 	for i := 0; i < layersCount; i++ {
-		outputs[i+1] = network.Layers[i].predict(outputs[i])
+		outputs[i+1] = network.Layers[i].Predict(outputs[i])
 	}
 	return outputs
 }

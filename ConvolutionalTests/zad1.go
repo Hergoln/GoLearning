@@ -29,6 +29,8 @@ func Zad1() {
 		filters,
 		1,
 		0,
+		0,
+		0,
 	)
 
 	output = mat.NewDense(secRows, secCols, output.RawMatrix().Data)
