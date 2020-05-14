@@ -217,29 +217,29 @@ func MaxPooling(data *mat.Dense, maskSize, imgRows, imgCols int) (*mat.Dense, *m
 	var ind int
 
 	pooledData := make([]float64, counterRows*counterCols*filterCols)
-	pusheMap := make([]float64, len(rawData))
-	for eachFilter := 0; eachFilter < counterCols; eachFilter++ {
+	pushedMap := make([]float64, len(rawData))
+	for eachFilter := 0; eachFilter < filterCols; eachFilter++ {
 
 		image := mat.DenseCopyOf(data.ColView(eachFilter))
 
-		for eachRow := 0; eachRow < imgRows; eachRow += maskSize {
-			for eachCol := 0; eachCol < imgCols; eachCol += maskSize {
+		for eachRow := 0; eachRow < counterRows; eachRow ++ {
+			for eachCol := 0; eachCol < counterCols; eachCol ++ {
 				// extract
 				extracted, ind = max(
-					extractMask(image.RawMatrix().Data, maskSize, imgCols, eachRow, eachCol),
+					extractMask(image.RawMatrix().Data, maskSize, imgCols, eachRow * 2, eachCol * 2),
 					imgCols,
-					eachRow,
-					eachCol,
+					eachRow * 2,
+					eachCol * 2,
+					maskSize,
 				)
-
-				pooledData[eachRow*imgCols/maskSize+eachCol/maskSize] = extracted
-				pusheMap[ind] = 1.0
+				pooledData[eachRow * counterCols + eachCol + eachFilter * counterRows * counterCols] = extracted
+ 				pushedMap[ind + eachFilter * len(image.RawMatrix().Data)] = 1.0
 			}
 		}
 	}
 
 	return mat.NewDense(counterRows*counterCols, filterCols, pooledData),
-		mat.NewDense(filterRows, filterCols, pusheMap)
+		mat.NewDense(filterRows, filterCols, pushedMap)
 }
 
 func MaxPushing(deltas, pooledMap *mat.Dense, maskSize int) *mat.Dense {
@@ -253,16 +253,17 @@ func MaxPushing(deltas, pooledMap *mat.Dense, maskSize int) *mat.Dense {
 	return stretched
 }
 
-func max(slice []float64, rowsLen, offsetRows, offsetCols int) (float64, int) {
+func max(slice []float64, rowsLen, offsetRows, offsetCols, maskSize int) (float64, int) {
 	max := slice[0]
 	ind := 0
 	for each := range slice {
 		if max < slice[each] {
 			ind = each
+			max = slice[each]
 		}
 	}
 
-	return max, ind + rowsLen*offsetCols + offsetRows
+	return max, rowsLen * offsetCols + offsetRows + ind % maskSize + (ind / maskSize) * rowsLen
 }
 
 func stretch(data []float64, maskSize, outRows, outCols, dataCols int) *mat.Dense {
