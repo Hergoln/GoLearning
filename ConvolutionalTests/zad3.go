@@ -14,10 +14,14 @@ func Zad3() {
 	// network creation
 	alpha := 0.01
 	outputSize := 10
-	maskSize := 2
-	inputRows := 28
-	inputCols := 28
-	fxInputSize := ((inputRows - maskSize) / maskSize + 1) * ((inputRows - maskSize) / maskSize + 1)
+	poolMaskSize := 2
+	filterSize := 3
+	inputRows := 28 // W1
+	inputCols := 28 // W2
+	filterCount := 16 // D
+	fxInputSize := (((inputRows - filterSize) + 1 - poolMaskSize) / poolMaskSize + 1 ) *
+		(((inputCols - filterSize) + 1 - poolMaskSize) / poolMaskSize + 1 ) *
+		filterCount
 
 	trainLabels := MNIST.ParseLabelFile("/train-labels.idx1-ubyte")
 	trainImages := MNIST.ParseImageFile("/train-images.idx3-ubyte")
@@ -33,7 +37,7 @@ func Zad3() {
 		func() float64 { return float64(rand.Uint64() % 2) },
 	)
 
-	conv := CONV.RandConvLayer(3, 3, 16, func() float64 { return rand.Float64()*0.02 - 0.01 })
+	conv := CONV.RandConvLayer(filterSize, filterSize, filterCount, func() float64 { return rand.Float64()*0.02 - 0.01 })
 
 	netErr := 0.0
 	for i, limit := 0, 100; i < limit; i++ {
@@ -49,7 +53,7 @@ func Zad3() {
 				MNIST.GetExpectedVector(trainLabels.Labels[set]),
 				fun.ReLu,
 				fun.ReLuDeriv,
-				maskSize,
+				poolMaskSize,
 			)
 		}
 
@@ -62,7 +66,7 @@ func Zad3() {
 				MNIST.GetInputVector(testImages.Images[set]),
 				inputRows,
 				inputCols,
-				maskSize,
+				poolMaskSize,
 			)
 			if testLabels.Labels[set] != MNIST.GetOutputLabel(prediction) {
 				errorCounter++

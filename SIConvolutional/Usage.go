@@ -19,8 +19,8 @@ func extractImageSections(input *mat.Dense, filterSize, stride int, inputRows in
 	outColsCount := (inputCols-filterSize)/stride + 1
 
 	outputData := make([]float64, 0)
-	for j := 0; j < outColsCount; j += stride {
-		for i := 0; i < outRowsCount; i += stride {
+	for j := 0; j < outColsCount; j++ {
+		for i := 0; i < outRowsCount; i++ {
 			outputData = append(outputData, extractMask(imageRawData, filterSize, inputCols, j, i)...)
 		}
 	}
@@ -143,11 +143,9 @@ func ConvAndFcFit(alpha float64, fc *Fc.NeuralLayer, layer *ConvolutionLayer, in
 }
 
 func ConvReluPoolFcPredict(fc *Fc.NeuralLayer, conv *ConvolutionLayer, input []float64, inputRows, inputCols int, maskSize int) []float64 {
-	convolution, _, _ := Convolute(mat.NewDense(1, len(input), input), conv.Filters, 1, 0, inputRows, inputCols)
-
-	// pooling
-	pooledFlatten := mat.DenseCopyOf(convolution)
-
+	convolution, rows, cols := Convolute(mat.NewDense(1, len(input), input), conv.Filters, 1, 0, inputRows, inputCols)
+	pooled, _ := MaxPooling(convolution, maskSize, rows, cols)
+	pooledFlatten := mat.NewDense(1, len(pooled.RawMatrix().Data), pooled.RawMatrix().Data)
 	return fc.Predict(pooledFlatten).RawMatrix().Data
 }
 
@@ -160,7 +158,7 @@ func ConvReluPoolFcFit(alpha float64, fc *Fc.NeuralLayer, layer *ConvolutionLaye
 	data := addPadding(inputDense, 0)
 	_, filterCols := layer.Filters.Dims()
 	filterSize := int(math.Sqrt(float64(filterCols)))
-	imageSections, _, _ := extractImageSections(data, filterSize, 1, inputRows, inputCols)
+	imageSections, rows, cols := extractImageSections(data, filterSize, 1, inputRows, inputCols)
 
 	filterOut := &mat.Dense{}
 	filterOut.Mul(imageSections, layer.Filters.T())
@@ -168,10 +166,11 @@ func ConvReluPoolFcFit(alpha float64, fc *Fc.NeuralLayer, layer *ConvolutionLaye
 	toReshapeRows, toReshapeCols := filterOut.Dims()
 	// active func
 	filterOutActiveFun := mat.NewDense(toReshapeRows, toReshapeCols, activeFunc(filterOut.RawMatrix().Data))
-	filterOutFlatten := mat.NewDense(1, len(filterOutActiveFun.RawMatrix().Data), filterOutActiveFun.RawMatrix().Data)
+	//filterOutFlatten := mat.NewDense(1, len(filterOutActiveFun.RawMatrix().Data), filterOutActiveFun.RawMatrix().Data)
 
 	// ====== conv ends ======
-	pooled, pooledMap := MaxPooling(filterOutActiveFun, maskSize)
+	pooled, pooledMap := MaxPooling(filterOutActiveFun, maskSize, rows, cols)
+	pooledRows, pooledCols := pooled.Dims()
 	pooledFlatten := mat.NewDense(1, len(pooled.RawMatrix().Data), pooled.RawMatrix().Data)
 	// ====== fc starts ======
 
@@ -181,35 +180,110 @@ func ConvReluPoolFcFit(alpha float64, fc *Fc.NeuralLayer, layer *ConvolutionLaye
 	fcDelta.Sub(fcOut, expectedDense)
 
 	filterDelta := &mat.Dense{}
-	filterDelta.Mul(fcDelta, fc.Neurons)
-
+	filterDelta.Mul(fcDelta, fc.Neurons) // 1 x 2704
+	// 1 x 2704 -> (13x13)x16
+	// inverse pooling (?)
 	// reshaping
-	filtersReshaped := mat.NewDense(toReshapeRows, toReshapeCols, filterDelta.RawMatrix().Data)
+	filtersReshaped := mat.NewDense(pooledRows,  pooledCols, filterDelta.RawMatrix().Data)
+	inversedPool := MaxPushing(filtersReshaped, pooledMap, maskSize)
 	// derive func
-	filtersReshaped.MulElem(filtersReshaped, mat.NewDense(toReshapeRows, toReshapeCols, derivFunc(filterOut.RawMatrix().Data)))
+	inversedPool.MulElem(inversedPool, mat.NewDense(toReshapeRows, toReshapeCols, derivFunc(filterOut.RawMatrix().Data)))
 
 	// fc deltas
 	fcWeightDelta := &mat.Dense{}
-	fcWeightDelta.Mul(fcDelta.T(), filterOutFlatten)
+	fcWeightDelta.Mul(fcDelta.T(), pooledFlatten)
 	fcWeightDelta.Scale(alpha, fcWeightDelta)
 	fc.Neurons.Sub(fc.Neurons, fcWeightDelta)
 
 	// conv deltas
 	filterWeightDelta := &mat.Dense{}
-	filterWeightDelta.Mul(filtersReshaped.T(), imageSections)
+	filterWeightDelta.Mul(inversedPool.T(), imageSections)
 	filterWeightDelta.Scale(alpha, filterWeightDelta)
-	// inverse pooling (?)
-	filterWeightDelta = ReshapePooling(filterWeightDelta, pooledMap, maskSize)
 	layer.Filters.Sub(layer.Filters, filterWeightDelta)
 
 	return 0.0
 }
 
 // returns pooled and binary representation of dense before pooling
-func MaxPooling(data *mat.Dense, maskSize int) (*mat.Dense, *mat.Dense) {
-	
+// each data.row is filter map
+// each col is a filters map
+func MaxPooling(data *mat.Dense, maskSize, imgRows, imgCols int) (*mat.Dense, *mat.Dense) {
+	rawData := data.RawMatrix().Data
+	// filterCols = number of filters
+	filterRows, filterCols := data.Dims()
+	counterRows := (imgRows-maskSize)/maskSize + 1
+	counterCols := (imgCols-maskSize)/maskSize + 1
+	var extracted float64
+	var ind int
+
+	pooledData := make([]float64, counterRows*counterCols*filterCols)
+	pusheMap := make([]float64, len(rawData))
+	for eachFilter := 0; eachFilter < counterCols; eachFilter++ {
+
+		image := mat.DenseCopyOf(data.ColView(eachFilter))
+
+		for eachRow := 0; eachRow < imgRows; eachRow += maskSize {
+			for eachCol := 0; eachCol < imgCols; eachCol += maskSize {
+				// extract
+				extracted, ind = max(
+					extractMask(image.RawMatrix().Data, maskSize, imgCols, eachRow, eachCol),
+					imgCols,
+					eachRow,
+					eachCol,
+				)
+
+				pooledData[eachRow*imgCols/maskSize+eachCol/maskSize] = extracted
+				pusheMap[ind] = 1.0
+			}
+		}
+	}
+
+	return mat.NewDense(counterRows*counterCols, filterCols, pooledData),
+		mat.NewDense(filterRows, filterCols, pusheMap)
 }
 
-func ReshapePooling(deltas, pooledMap *mat.Dense, maskSize int) *mat.Dense {
+func MaxPushing(deltas, pooledMap *mat.Dense, maskSize int) *mat.Dense {
+	rawData := deltas.RawMatrix().Data
+	_, deltaCols := deltas.Dims()
+	rows, cols := pooledMap.Dims()
 
+	// stretch rawData
+	stretched := stretch(rawData, maskSize, rows, cols, deltaCols)
+	stretched.MulElem(pooledMap, stretched)
+	return stretched
+}
+
+func max(slice []float64, rowsLen, offsetRows, offsetCols int) (float64, int) {
+	max := slice[0]
+	ind := 0
+	for each := range slice {
+		if max < slice[each] {
+			ind = each
+		}
+	}
+
+	return max, ind + rowsLen*offsetCols + offsetRows
+}
+
+func stretch(data []float64, maskSize, outRows, outCols, dataCols int) *mat.Dense {
+	newData := make([][]float64, outRows)
+	for each := range newData {
+		newData[each] = make([]float64, 0, outCols)
+	}
+
+	for each := range data {
+		for row := 0; row < maskSize; row++ {
+			for col := 0; col < maskSize; col++ {
+				rowsOffset := each / dataCols
+				newData[row+rowsOffset*maskSize] = append(newData[row+rowsOffset*maskSize], data[each])
+			}
+		}
+	}
+
+	output := make([]float64, 0, outRows*outCols)
+	for each := range newData {
+		output = append(output, newData[each]...)
+	}
+
+	return mat.NewDense(outRows, outCols, output)
 }
