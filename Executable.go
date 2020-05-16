@@ -1,12 +1,9 @@
 package main
 
 import (
-	"./ConvolutionalTests"
+	"./Genetic"
 )
 
 func main() {
-	//ConvolutionalTests.Zad1()
-	//ConvolutionalTests.Example()
-	//ConvolutionalTests.Zad2()
-	ConvolutionalTests.Zad3()
+	Genetic.Zad1()
 }
