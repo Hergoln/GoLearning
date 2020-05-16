@@ -12,7 +12,7 @@ import (
 func Zad3() {
 	// don't know how to get this value, thus its hard coded for now
 	// network creation
-	alpha := 0.01
+	alpha := 0.001
 	outputSize := 10
 	poolMaskSize := 2
 	filterSize := 3
