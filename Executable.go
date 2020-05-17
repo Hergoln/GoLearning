@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	Genetic.Zad1()
+	Genetic.Zad2()
 }

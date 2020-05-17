@@ -20,7 +20,7 @@ func GeneratePopulation(n, chromosomeLen int, generator func(int) Chromosome) []
 
 // iteration steps:
 // Selection -> Crossing -> Mutation
-func NaturalSelection(population []Chromosome,
+func SimpleGens(population []Chromosome,
 	fitnessFunc func (Chromosome) float64,
 	eliteCount int,
 	selectionFunc selector,
@@ -33,7 +33,6 @@ func NaturalSelection(population []Chromosome,
 
 	fitValues := make([]float64, len(population))
 	var offspring, elites []Chromosome
-
 
 	// main algorithm loop
 	for iter := 0; iter < iterationsCap; iter++ {
@@ -106,4 +105,58 @@ func sortChromosomesByFitDesc(population []Chromosome, fitnessFunc func (Chromos
 	}
 
 	return elites
+}
+
+func FindEquationSolution(population []Chromosome,
+	fitnessFunc func (Chromosome) float64,
+	eliteCount int,
+	selectionFunc selector,
+	crossingFunc func(Chromosome, Chromosome) []Chromosome,
+	mutationProb float64,
+	mutationFunc func(Chromosome) Chromosome,
+	iterationsCap int,
+	) Chromosome {
+	rand.Seed(time.Now().UnixNano())
+
+	fitValues := make([]float64, len(population))
+	//var elites []Chromosome
+	// main algorithm loop
+	for iter := 0; iter < iterationsCap; iter++ {
+		for each := range population {
+			fitValues[each] = fitnessFunc(population[each])
+			if fitValues[each] == 1.0 {
+				return population[each]
+			}
+		}
+
+		// new population
+		population = selectionFunc(population, eliteCount, fitnessFunc)
+
+		tempPopulation := deepCopy(population[:len(population) / 2])
+		offspring := make([]Chromosome, len(tempPopulation))
+		for i := 0; i < len(population) / 2; i++ {
+			offspring[i] = crossingFunc(tempPopulation[i], tempPopulation[len(offspring) - 1 - i])[0]
+		}
+
+		// I believe this one only copies address(reference)
+		population = deepCopy(append(population[len(population) / 2:], offspring...))
+		for each := range population {
+			probValue := rand.Float64()
+			if probValue < mutationProb {
+				population[each] = mutationFunc(population[each])
+			}
+		}
+	}
+
+	return maxFromPopulation(population, fitnessFunc)
+}
+
+func deepCopy(toCopy []Chromosome) []Chromosome {
+	toRet := make([]Chromosome, len(toCopy))
+
+	for each := range toRet {
+		toRet[each] = toCopy[each]
+	}
+
+	return toRet
 }
