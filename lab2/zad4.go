@@ -30,6 +30,7 @@ type TestFileLine struct {
 }
 
 func Zad4() {
+	// 2.4
 	network := LegacySIFullyConnected.ConstructRandomNetwork(3, 4).Layers[0]
 	resp, err := http.Get("http://pduch.iis.p.lodz.pl/PSI/training_colors.txt")
 	if err != nil {
@@ -50,7 +51,7 @@ func Zad4() {
 	testingLines := parseTestingFiles(resp.Body)
 	alpha := 0.01
 
-	for i := 0; ; i++ {
+	for learningIterations := 0; ; learningIterations++ {
 		errorCounter := 0
 
 		for line := range trainingLines {
@@ -71,7 +72,7 @@ func Zad4() {
 			}
 		}
 		if errorCounter == 0 {
-			fmt.Printf("(NORM)Perfect score, %d iterations\n", i)
+			fmt.Printf("\n2.4\n(NORM)Perfect score, %d iterations\n", learningIterations)
 			return
 		}
 	}

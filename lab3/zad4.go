@@ -13,7 +13,7 @@ func Zad4() {
 	// don't know how to get this value, thus its hard coded for now
 	rand.Seed(time.Now().UnixNano())
 	// network creation
-	alpha := 0.01
+	alpha := 0.001
 	network := SI.CreateNetwork(
 		[]int{784, 40, 10},
 		[]SI.ActiveFunc{fun.Sigmoid, fun.Softmax},

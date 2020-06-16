@@ -62,7 +62,7 @@ func Zad2() {
 
 	fitnessFunc := func(chromosome Chromosome) float64 {
 		A, B := getABFromChromosome(chromosome)
-		res := math.Abs(2.0*A*A+B-33.0) + 1
+		res := math.Abs(2.0 * A * A + B - 33.0) + 1
 		return 1 / res
 	}
 

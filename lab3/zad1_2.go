@@ -46,6 +46,7 @@ import (
  */
 
 func Zad1_2() {
+	// 3.1
 	network := LegacySIFullyConnected.GibLayers(
 		[][][]float64{
 			{
@@ -67,6 +68,7 @@ func Zad1_2() {
 		{9.0, 0.9, 1.0},	// serie 4
 	}
 
+	fmt.Print("\n3.1\n")
 	for i := range inputSeries {
 		fmt.Printf("%.3f\n", network.PredictActiveFunc(inputSeries[i], ReLu))
 	}
@@ -78,20 +80,19 @@ func Zad1_2() {
 		{0.1, 1.0, 0.2},
 	}
 
+	// 3.2
 	alpha := 0.01
 
-	//network.StudyActiveFunc(alpha, expectedSeries[0], inputSeries[0], ReLu)
 	err := 0.0
-	for i := 0; i <= 50; i++ {
+	for i := 0; i < 50; i++ {
 		err = 0.0
 		for series := range expectedSeries {
 			temp := network.StudyActiveFunc(alpha, expectedSeries[series], inputSeries[series], ReLu)
-			fmt.Printf("%f +\n", temp)
 			err += temp
 		}
 	}
 
-	fmt.Printf("end, cumulative err: %f", err)
+	fmt.Printf("\n3.2\nend, cumulative err: %f", err)
 }
 
 func ReLu(x float64) float64 {

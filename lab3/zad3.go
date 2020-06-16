@@ -36,11 +36,11 @@ type TestFileLine struct {
 */
 
 func Zad3() {
+	// 3.3
 	LIMIT := 500
 	STEP := 10
 	network := LegacySIFullyConnected.ConstructRandomNetwork(3, 4)
 	network.AppendRandomLayerWithActiveFunc(4, nil, nil)
-	network.DisplayNet()
 
 	resp, err := http.Get("http://pduch.iis.p.lodz.pl/PSI/training_colors.txt")
 	if err != nil {
@@ -78,15 +78,10 @@ func Zad3() {
 			var expectedOutput [4]float64
 			expectedOutput[testingLines[line].expected - 1] = 1.
 			prediction = network.PredictActiveFunc(testingLines[line].input[:], ReLu)
-			//fmt.Println(prediction)
-			//fmt.Println(expectedOutput)
 			indPre, _ := getColorAndIndex(prediction)
 			indExp, _ := getColorAndIndex(expectedOutput[:])
 			if indPre != indExp {
-				//fmt.Println("Incorrect")
 				errorCounter++
-			} else {
-				//fmt.Println("Correct")
 			}
 		}
 

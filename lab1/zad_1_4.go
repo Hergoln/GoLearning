@@ -7,18 +7,20 @@ import (
 // Hidden network
 func Main() {
 
+	// 1.1 neuron
 	input := []float64 {1, 1, 1}
 
 	neuron := NeuronN{[]float64{.5}}
-	fmt.Println(neuron.Scale(input))
+	fmt.Printf("zad 1.1\n%f\n", neuron.Scale(input))
 
+	// 1.2 layer
 	weights := []float64{.5, .1, 1}
 	neuronN := NeuronN{weights}
 
-	fmt.Println(neuronN.Scale(input))
+	fmt.Printf("zad 1.2\n%f\n", neuronN.Scale(input))
 
-	// simple network
-	network := NeuralNetwork{ 
+	// 1.3 simple network
+	network := NeuralNetwork{
 		[]NeuronN {
 			{[]float64{.1, .1, -0.3}}, 
 			{[]float64{.1, .2, .0}}, 
@@ -31,11 +33,12 @@ func Main() {
 		{9.0, 0.9, 1.0}}  // seria 4
 	//   in1, in2, in3
 
+	fmt.Println("1.3 simple network")
 	for _, serie := range inputs {
 		fmt.Println(network.Calculate(serie))
 	}
 
-	// hidden network
+	// 1.4 hidden network
 	hiddenNetwork := LayerNetwork{ 
 		[]NeuronN {
 			{[]float64{.1, .2, -0.1}}, 
@@ -53,12 +56,13 @@ func Main() {
 			hiddenNetwork,
 			outputNetwork}}
 
-	fmt.Println("Deep net")
+	fmt.Println("zad 1.4 hidden network")
 	for _, serie := range inputs {
 		fmt.Println(fullNetwork.Calculate(serie))
 		fmt.Println()
 	}
 
+	// 1.5 fully connected
 	hiddenInputs := []float64{8.5, 0.65, 1.2}
 
 	randomNetwork := CreateNeuralNetWithRandomWeights([]int{2, 3, 4})

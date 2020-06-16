@@ -12,7 +12,7 @@ import (
 func Zad2() {
 	// don't know how to get this value, thus its hard coded for now
 	// network creation
-	alpha := 0.01
+	alpha := 0.02
 	inputSize := 676 * 16
 	inputRows := 28
 	inputCols := 28

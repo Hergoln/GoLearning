@@ -28,9 +28,9 @@ func Zad1() {
 		mat.NewDense(5, 5, inputImage),
 		filters,
 		1,
-		0,
-		0,
-		0,
+		1,
+		5,
+		5,
 	)
 
 	output = mat.NewDense(secRows, secCols, output.RawMatrix().Data)

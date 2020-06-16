@@ -6,7 +6,15 @@ import (
 )
 
 func Zad3() {
-	layer := LegacySIFullyConnected.GibNeurons(
+	// 2.3
+	layerHuan := LegacySIFullyConnected.GibNeurons(
+		[][]float64{
+			{0.1, 0.1, -0.3},
+			{0.1, 0.2, 0.0},
+			{0.0, 1.3, 0.1},
+		})
+
+	layerTwuan := LegacySIFullyConnected.GibNeurons(
 		[][]float64{
 			{0.1, 0.1, -0.3},
 			{0.1, 0.2, 0.0},
@@ -27,29 +35,39 @@ func Zad3() {
 		{0.1, 1.0, 0.2},
 	}
 
+	fmt.Print("\n2.3\n")
+	iterations := 8000
 	alpha := 0.01
+	studyAndPrint(alpha, iterations, layerHuan, expectedSeries, inputSeries)
 
-	//fmt.Println(network.Layers[0].Study(alpha, expectedSeries[0], inputSeries[0]))
-	//for i := range network.Layers[0].Neurons {
-	//	fmt.Println(network.Layers[0].Neurons[i])
-	//}
+	// learning with lower alpha
+	alpha = 0.001
+	studyAndPrint(alpha, iterations, layerTwuan, expectedSeries, inputSeries)
 
-	err := .0
-	for i := 0; i < 80000; i++ {
+	/*
+		Q: Jaka jest minimalna wartość błędu skumulowanego, jaką może osiągnąć ta sieć?
+		A: 0.106491, gdzieś pomiędzy 7 a 8 tysięcy iteracji przy alpha = 0.01
+			przy alfie 0.001 bląd może wynieść ok 0.082125
+	 */
+
+}
+
+func studyAndPrint(alpha float64, iterations int, layer LegacySIFullyConnected.NeuralLayer, expected [][]float64, input [][]float64) {
+	minErr := 1.0
+	err := 0.0
+	for i := 0; i < iterations; i++ {
 		var errors []float64
 		err = .0
-		for j := range expectedSeries {
-			errors = layer.Study(alpha, expectedSeries[j], inputSeries[j])
+		for j := range expected {
+			errors = layer.Study(alpha, expected[j], input[j])
 			for _, e := range errors {
 				err += e
 			}
 		}
+		if minErr > err {
+			minErr = err
+		}
 	}
-	fmt.Println(err)
 
-	/*
-		Q: Jaka jest minimalna wartość błędu skumulowanego, jaką może osiągnąć ta sieć?
-		A: 0.1082564980797942, gdzieś pomiędzy 7 a 8 tysięcy iteracji przy alpha = 0.01
-	 */
-
+	fmt.Printf("alpha = %.3f\n err = %f\n", alpha, minErr)
 }
