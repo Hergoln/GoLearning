@@ -13,13 +13,6 @@ import (
 func main() {
 	consoleRead := bufio.NewScanner(os.Stdin)
 
-	//fmt.Printf("Would you like to send broadcast messege? Y/N")
-	//response := consoleRead.Text()
-	//if strings.EqualFold(response, "Y") {
-	//	broadcastMessages(consoleRead)
-	//	return
-	//}
-
 	connectString := resolveUsersChoice(consoleRead)
 
 	fmt.Print("Waiting for connection... ")
@@ -57,12 +50,6 @@ func handleMessage(message string, conn *net.UDPConn) {
 		addrRecv.String(),
 		string(buff[:bytesRead]))
 }
-
-//func broadcastMessages(consoleRead *bufio.Scanner) {
-//	connectString := resolveUsersChoice(consoleRead)
-//
-//
-//}
 
 func resolveUsersChoice(consoleRead *bufio.Scanner) string {
 	var addr, port, response string

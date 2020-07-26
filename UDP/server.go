@@ -1,13 +1,13 @@
 package main
 
 import (
+	"../netUtils"
 	"bufio"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"strings"
-	"../netUtils"
 )
 
 func main() {
