@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"net"
+	"strconv"
 	"time"
 )
 
@@ -57,7 +58,7 @@ func clientHandler(conn net.Conn) {
 		response := string(buff[:readBytes])
 		log.Printf("Client said: %s\n", response)
 		if response == TimeRequest {
-			_, err = writer.Write(timeInBytes())
+			_, err = writer.Write(nowInBytes())
 			if err != nil {
 				break
 			}
@@ -69,6 +70,6 @@ func clientHandler(conn net.Conn) {
 	}
 }
 
-func timeInBytes() []byte {
-	return []byte(time.Now().String())
+func nowInBytes() []byte {
+	return []byte(strconv.FormatInt(time.Now().UnixNano(), 10))
 }

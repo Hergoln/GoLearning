@@ -17,17 +17,26 @@ const (
 )
 
 func RunServer() {
-	closingChan := make(chan int)
-	pickablePorts := []int{7312, 7321, 7123, 1723, 7231, 2137}
-	tcpPort := -1
+	var (
+		err error
+		closingChan = make(chan int)
+		pickablePorts = []int{7312, 7321, 7123, 1723, 7231, 2137}
+		tcpPort = -1
+		addrs []string
+	)
 
 	interfacesAddrs := ListOfPublicEthernetInterfacesIPs()
 	if interfacesAddrs == nil {
 		fmt.Print(ShutdownMessage)
 		return
 	}
-	util.LastAddr(interfacesAddrs[0])
-	udpAddr, err := net.ResolveUDPAddr("udp", util.StringAddr(interfacesAddrs[0], UdpPort))
+	broad, err := util.LastAddr(interfacesAddrs[0])
+	if err != nil {
+		fmt.Println(err)
+		fmt.Print(ShutdownMessage)
+		return
+	}
+	udpAddr, err := net.ResolveUDPAddr("udp", util.StringAddr(broad, UdpPort))
 	if err != nil {
 		fmt.Println(err)
 		fmt.Print(ShutdownMessage)
@@ -36,13 +45,14 @@ func RunServer() {
 
 	for _, addr := range interfacesAddrs[1:] {
 		tcpPort, pickablePorts = randPort(pickablePorts)
-		tcpAddr := util.StringAddr(addr, tcpPort)
+		tcpAddr := util.StringAddr(*addr, tcpPort)
+		addrs = addAddrsToTable(addrs, tcpAddr)
 		go RunTCPServer(tcpAddr, closingChan)
 	}
 	defer func() {
 		closingChan <- EndSignal
 	}()
-	RunUDPServer(udpAddr, closingChan)
+	RunUDPServer(udpAddr, addrs, closingChan)
 }
 
 func randPort(pickablePorts []int) (int, []int) {

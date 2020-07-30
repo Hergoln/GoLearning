@@ -30,23 +30,23 @@ func ReusePort(network, address string, conn syscall.RawConn) error {
 }
 
 
-func LastAddr(n *net.Addr) (*net.Addr, error) {
+func LastAddr(n *net.Addr) (net.Addr, error) {
 	IP, netIP, _ := net.ParseCIDR((*n).String())
 	if IP.To4() == nil {
 		return nil, errors.New("does not support IPv6 addresses")
 	}
 	ip := make(net.IP, len(IP.To4()))
 	binary.BigEndian.PutUint32(ip, binary.BigEndian.Uint32(IP.To4())|^binary.BigEndian.Uint32(net.IP(netIP.Mask).To4()))
-
+	number, _ := netIP.Mask.Size()
 	var result net.Addr = MyAddr{
 		network: "udp",
-		addr: ip.String() + netIP.Mask.String(),
+		addr: ip.String() + "/"+ strconv.Itoa(number),
 	}
-	return &result, nil
+	return result, nil
 }
 
-func StringAddr(addr *net.Addr, port int) string {
-	log.Println((*addr).String())
-	IP, _, _ := net.ParseCIDR((*addr).String())
+func StringAddr(addr net.Addr, port int) string {
+	IP, _, _ := net.ParseCIDR(addr.String())
+	log.Println(IP.String() + ":" + strconv.Itoa(port))
 	return IP.String() + ":" + strconv.Itoa(port)
 }
