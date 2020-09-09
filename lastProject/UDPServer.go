@@ -21,7 +21,7 @@ func RunUDPServer(addr *net.UDPAddr, tcpAddrs []string, closingChan chan int) {
 		conn.Close()
 	}()
 	checkErr(err)
-	log.Println("Listen and Obey " + addr.String())
+	log.Printf("Listen and Obey (%s:UDP)...\n", addr.String())
 	for {
 		buff := make([]byte, 512)
 		count, _, err := conn.ReadFrom(buff)

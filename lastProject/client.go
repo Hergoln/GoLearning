@@ -10,10 +10,11 @@ import (
 	"time"
 )
 
+
 func RunClient() {
 	var (
 		err           error
-		broadLoopback = "192.168.56.255"
+		broadLoopback = "255.255.255.255"
 	)
 
 	udpAddr, err := net.ResolveUDPAddr("udp", broadLoopback+":"+strconv.Itoa(UdpPort))
@@ -30,12 +31,13 @@ func RunClient() {
 
 func HandleCommunication(udpAddr *net.UDPAddr, udpConn net.PacketConn) {
 	var (
-		err       error
-		message   string
-		addr      string
-		addrs     []string
-		addrIndex int
-		buff      = make([]byte, 512)
+		err                  error
+		message              string
+		addr                 string
+		addrs                []string
+		addrIndex            int
+		highlightedAddrIndex int = -1
+		buff                     = make([]byte, 512)
 	)
 
 	for {
@@ -47,8 +49,12 @@ func HandleCommunication(udpAddr *net.UDPAddr, udpConn net.PacketConn) {
 		addr = handleResponse(message)
 		if addr != "" {
 			addrs = addAddrsToTable(addrs, addr)
-			addrIndex = chooseAddr(addrs)
-			if addrIndex >= 0 {
+			addrIndex = chooseAddr(addrs, highlightedAddrIndex)
+			highlightedAddrIndex = addrIndex
+			if addrIndex < 0 {
+				log.Println("Waiting 10s")
+				time.Sleep(10 * time.Second)
+			} else if addrIndex >= 0 && addrIndex < len(addrs) {
 				err = handleTcpConnection(addrs[addrIndex])
 				if err != nil {
 					log.Println("Connection lost")
@@ -56,8 +62,8 @@ func HandleCommunication(udpAddr *net.UDPAddr, udpConn net.PacketConn) {
 					log.Println("Connection closed")
 				}
 			} else {
-				log.Println("Waiting 10s")
-				time.Sleep(10 * time.Second)
+				log.Print("Closing client")
+				return
 			}
 		}
 	}
@@ -94,13 +100,22 @@ func stringArrayContains(array []string, el string) bool {
 	return false
 }
 
-func chooseAddr(addrs []string) int {
-	log.Printf("%d Wait", 0)
+func chooseAddr(addrs []string, highlighted int) int {
+	prettyPrintIf("%d Wait %s", -1 == highlighted, 0, "")
 	for index, addr := range addrs {
-		log.Printf("%d %s\n", index+1, addr)
+		prettyPrintIf("%d %s", index == highlighted, index+1, addr)
 	}
-	choice := readValueInRange(0, len(addrs))
+	log.Printf("%d Exit", len(addrs)+1)
+	choice := readValueInRange(0, len(addrs)+1)
 	return choice - 1
+}
+
+func prettyPrintIf(format string, condition bool, index int, addr string) {
+	if condition {
+		log.Printf(RedColor+format+ResetColor+"\n", index, addr)
+	} else {
+		log.Printf(format+"\n", index, addr)
+	}
 }
 
 func readValueInRange(min, max int) int {
@@ -110,8 +125,8 @@ func readValueInRange(min, max int) int {
 		choice      = -1
 	)
 	log.Printf("Values between %d - %d", min, max)
-	consoleRead.Scan()
 	for {
+		consoleRead.Scan()
 		response = consoleRead.Text()
 		choice = validateNumber(response, min, max)
 		if choice != -1 {
@@ -174,7 +189,7 @@ func handleTcpConnection(addr string) error {
 			return err
 		}
 		Tcli = time.Now().UnixNano()
-		delta = Tserv + (Tcli - T1)/2 - Tcli
+		delta = Tserv + (Tcli-T1)/2 - Tcli
 		log.Printf("Time: %s, delta: %d", time.Unix(0, Tcli+delta), delta)
 		if readUserInput() {
 			return nil

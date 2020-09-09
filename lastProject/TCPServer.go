@@ -24,7 +24,7 @@ func RunTCPServer(addr string, closing chan int) {
 		listen.Close()
 	}()
 
-	log.Println("Begin listening ...")
+	log.Printf("Begin listening (%s:TCP) ...\n", addr)
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
@@ -46,6 +46,7 @@ func clientHandler(conn net.Conn) {
 	)
 
 	defer func() {
+		log.Println("Client disconnected")
 		conn.Close()
 	}()
 

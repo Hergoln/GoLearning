@@ -1,3 +1,3 @@
 GO=C:\Go\bin\go
-GO build
+go build
 ./lastProject.exe $1

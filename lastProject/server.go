@@ -14,15 +14,17 @@ const (
 	UdpPort         = 7
 	DiscoverMessage = "DISCOVER"
 	OfferPrefix     = "OFFER ADDRESS PORT"
+	RedColor        = "\033[31m"
+	ResetColor      = "\033[0m"
 )
 
 func RunServer() {
 	var (
-		err error
-		closingChan = make(chan int)
+		err           error
+		closingChan   = make(chan int)
 		pickablePorts = []int{7312, 7321, 7123, 1723, 7231, 2137}
-		tcpPort = -1
-		addrs []string
+		tcpPort       = -1
+		addrs         []string
 	)
 
 	interfacesAddrs := ListOfPublicEthernetInterfacesIPs()
@@ -30,7 +32,7 @@ func RunServer() {
 		fmt.Print(ShutdownMessage)
 		return
 	}
-	broad, err := util.LastAddr(interfacesAddrs[0])
+	broad, err := util.LastAddrInNetwork(interfacesAddrs[0])
 	if err != nil {
 		fmt.Println(err)
 		fmt.Print(ShutdownMessage)
