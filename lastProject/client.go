@@ -10,6 +10,19 @@ import (
 	"time"
 )
 
+type Alias = int
+
+type list struct {
+	DISCONNECTED Alias
+	CONNECTED    Alias
+	EXIT         Alias
+}
+
+var State = &list{
+	DISCONNECTED: 0,
+	CONNECTED:    1,
+	EXIT:         2,
+}
 
 func RunClient() {
 	var (
@@ -19,52 +32,88 @@ func RunClient() {
 
 	udpAddr, err := net.ResolveUDPAddr("udp", broadLoopback+":"+strconv.Itoa(UdpPort))
 	checkErr(err)
-
 	conn, err := ListenUDP(UdpPort)
 	checkErr(err)
-	defer func() {
-		log.Println("Closing UDP client side connection...")
-		conn.Close()
-	}()
 	HandleCommunication(udpAddr, conn)
 }
 
 func HandleCommunication(udpAddr *net.UDPAddr, udpConn net.PacketConn) {
 	var (
 		err                  error
-		message              string
-		addr                 string
 		addrs                []string
-		addrIndex            int
+		addrIndex            int = -1
 		highlightedAddrIndex int = -1
-		buff                     = make([]byte, 512)
+		openConnectionChan       = make(chan Alias)
+		addrChan                 = make(chan string)
 	)
 
+	go handleUDP(udpAddr, udpConn, addrChan, openConnectionChan)
+	go fillAddrs(addrChan, &addrs, &highlightedAddrIndex)
 	for {
-		_, err = udpConn.WriteTo([]byte(DiscoverMessage), udpAddr)
+		addrIndex = chooseAddr(&addrs, highlightedAddrIndex)
+		highlightedAddrIndex = addrIndex
+		if addrIndex < 0 {
+			log.Print("Closing client")
+			go func(){openConnectionChan <- State.EXIT}()
+			return
+		} else {
+			go func(){openConnectionChan <- State.CONNECTED}()
+			err = handleTcpConnection(addrs[addrIndex])
+			if err != nil {
+				log.Println("Connection lost")
+			} else {
+				log.Println("Connection closed")
+				go func(){openConnectionChan <- State.DISCONNECTED}()
+			}
+		}
+	}
+}
+
+func fillAddrs(addrChan chan string, addrs *[]string, prevChoice *int) {
+	for {
+		addr := <-addrChan
+		if addr == "exit" {
+			return
+		}
+		if addr != " " {
+			*addrs = addAddrsToTable(*addrs, addr)
+			printChoices(*addrs, *prevChoice)
+		}
+	}
+}
+
+func printChoices(choices []string, prevChoice int) {
+	log.Printf("%d Exit", 0)
+	for index, choice := range choices {
+		prettyPrintIf("%d %s", index == prevChoice, index+1, choice)
+	}
+}
+
+func handleUDP(udpAddr *net.UDPAddr, udpConn net.PacketConn, addrChan chan string, stateChan chan Alias) {
+	state := State.DISCONNECTED
+	buff := make([]byte, 512)
+
+	for{
+		select {
+		case state = <- stateChan:
+		default:
+		}
+		if state == State.CONNECTED {
+			state = <- stateChan
+		}
+		if state == State.EXIT {
+			addrChan <- "exit"
+			return
+		}
+		_, err := udpConn.WriteTo([]byte(DiscoverMessage), udpAddr)
 		checkErr(err)
 		count, _, err := udpConn.ReadFrom(buff)
 		checkErr(err)
-		message = string(buff[:count])
-		addr = handleResponse(message)
-		if addr != "" {
-			addrs = addAddrsToTable(addrs, addr)
-			addrIndex = chooseAddr(addrs, highlightedAddrIndex)
-			highlightedAddrIndex = addrIndex
-			if addrIndex < 0 {
-				log.Println("Waiting 10s")
-				time.Sleep(10 * time.Second)
-			} else if addrIndex >= 0 && addrIndex < len(addrs) {
-				err = handleTcpConnection(addrs[addrIndex])
-				if err != nil {
-					log.Println("Connection lost")
-				} else {
-					log.Println("Connection closed")
-				}
-			} else {
-				log.Print("Closing client")
-				return
-			}
+		message := string(buff[:count])
+		message = handleResponse(message)
+		if strings.Compare(message, "") != 0 {
+			addrChan <- message
+			time.Sleep(10 * time.Second)
 		}
 	}
 }
@@ -100,14 +149,21 @@ func stringArrayContains(array []string, el string) bool {
 	return false
 }
 
-func chooseAddr(addrs []string, highlighted int) int {
-	prettyPrintIf("%d Wait %s", -1 == highlighted, 0, "")
-	for index, addr := range addrs {
-		prettyPrintIf("%d %s", index == highlighted, index+1, addr)
+func chooseAddr(addrs *[]string, highlighted int) int {
+	var (
+		consoleRead = bufio.NewScanner(os.Stdin)
+		response    string
+		choice      = -1
+	)
+	for {
+		consoleRead.Scan()
+		response = consoleRead.Text()
+		choice = validateNumber(response, 0, len(*addrs))
+		if choice != -1 {
+			return choice - 1
+		}
+		log.Printf("Incorrect value (min: %d, max: %d)\n", 0, len(*addrs))
 	}
-	log.Printf("%d Exit", len(addrs)+1)
-	choice := readValueInRange(0, len(addrs)+1)
-	return choice - 1
 }
 
 func prettyPrintIf(format string, condition bool, index int, addr string) {
