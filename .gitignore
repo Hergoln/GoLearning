@@ -1,1 +1,7 @@
 DeepLearning.pdf
+builds
+*.zip
+*.jar
+.idea
+*.exe
+GoTour/*.exe
