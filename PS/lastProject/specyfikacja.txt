@@ -1,0 +1,31 @@
+Serwer:
+- Wyszukuje wszystkie "rutowalne interfejsy"
+- Uruchamia serwer TCP na każdy ze znalezionych interfejsów, każdy serwer posiada 
+	unikatowy numer portu (może być losowany).
+- Rozpoczyna nasłuchiwanie komunikatów DISCOVER na porcie 7 z użyciem protokołu UDP i
+	wysyła w odpowiedzi adresy uruchomionych serwerów TCP, każdy adres w oddzielnym 
+	pakiecie. Nasłuchiwanie ma miejsce przez cały czas działania aplikacji.
+- Po utworzeniu połączenia z klientem jest tworzony dla niego oddzielny wątek 
+	odpowiedzialny za komunikację z klientem. Zaraz po ustanowieniu połączenia serwer 
+	wysyła do klienta informacje o swoim czasie systemowym. 
+- Po rozłączeniu się klienta połączenie jest przerywane a wątek jest zakończony.
+
+
+Klient:
+- Wysyła komunikat DISCOVER za pomocą komunikacji UDP na porcie 7 w celu otrzymania
+	informacji o adresach serwerów TCP do których może się połączyć.
+- Daje użytkownikowi możliwość wyboru adresu, z którym ma się połączyć, ostatnio 
+	odwiedzony serwer jest wyróżniony jako domyślny.
+- Jeżeli nie uda się połączyć z serwerem moduł ponownie szuka adresów za pomocą UDP.
+- Jeżeli klient nie chciał połączyć się z serwerem TCP lub połącznie zostało przerwane
+	lista dostępnych serwerów jest aktualizowana co 10 s.
+- Po wybraniu przez użytkownika serwera, moduł pyta o częstotliwość wysyłania zapytań 
+	do serwer F(10 - 1000 ms)
+- Uruchamia połączenie i pracuje zgodnie z algorytmem w pdf'ie:
+	1. zapamiętuje czas (T1)
+	2. wysyła żądanie do serwera o jego czas systemowy
+	3. odbiera odpowiedź
+	4. zapamiętuje czas (T2)
+	5. obliczenie różnicy pomiędzy czasem 1 i czsem 4 (delta = Tserv + (T2 - T1)/2 - T2)
+	6. wypisanie czasu w formacie T2 + delta oraz wartości delta
+	7. Czy przerywamy? (T: zamknięcie połączenia, N: uśpienie wątku na F i powrót do p1)
