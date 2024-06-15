@@ -1,0 +1,5 @@
+services:
+  example:
+    image: golang:1.21.1
+    volumes:
+      - ./:/app
