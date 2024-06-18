@@ -1,6 +1,0 @@
-services:
-  example:
-    image: ubuntu
-    volumes:
-      - ./source_dir:/app/target_dir
-    command: touch /app/target_dir/hello
