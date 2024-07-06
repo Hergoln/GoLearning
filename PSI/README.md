@@ -1,5 +1,4 @@
-## [GoLearning](https://github.com/Hergoln/GoLearning/tree/master) sub-project PSI (Podstawy Sztucznej Inteligencji)
-Project contains my trials and errors in making some kind of ML(Machine Learning) package/library for subject of my studies.
+## Directory contains my trials and errors in making some kind of ML(Machine Learning) package/library for subject of my studies.
 
 ### Content:
 * FunctionsAndDerivatives - functions and their derivatives useful in ML
