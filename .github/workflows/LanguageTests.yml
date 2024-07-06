@@ -24,7 +24,9 @@ jobs:
         run: ls .
   
       - name: Build LanguageTests directory
-        run: go build -v ./LanguageTests/...
+        working-directory: ./LanguageTests
+        run: go build -v .
   
       - name: Tests from LanguageTests directory
-        run: go test -v ./LanguageTests/...
+        working-directory: ./LanguageTests
+        run: go test -v .
