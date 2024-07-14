@@ -30,5 +30,3 @@ jobs:
       - name: Tests from LanguageTests directory
         working-directory: ./LanguageTests
         run: go test -v .
-
-      - name: Build dockerfile from 
